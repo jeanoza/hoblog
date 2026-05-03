@@ -7,11 +7,12 @@ datasource db {
 }
 
 model User {
-  id         Int        @id @default(autoincrement())
-  email      String     @unique
-  name       String
-  createdAt  DateTime   @default(now())
-  activities Activity[]
+  id           Int        @id @default(autoincrement())
+  email        String     @unique
+  name         String
+  passwordHash String
+  createdAt    DateTime   @default(now())
+  activities   Activity[]
 }
 
 model Category {
