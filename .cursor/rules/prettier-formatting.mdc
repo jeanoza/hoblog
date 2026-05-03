@@ -1,0 +1,76 @@
+---
+description: Enforce prettier formatting rules when writing TypeScript/JavaScript code
+globs: **/*.{ts,tsx,js,jsx,spec.ts}
+alwaysApply: false
+---
+
+# Prettier Formatting Rules
+
+This project uses prettier with the following config (`backend/.prettierrc`):
+- `singleQuote: true`
+- `trailingComma: "all"`
+
+Always apply these rules when writing or editing code.
+
+## Trailing Commas
+
+Add a trailing comma after the last item in multi-line objects, arrays, function arguments, and destructuring.
+
+```typescript
+// ❌ BAD
+await useCase.execute({
+  email: 'test@example.com',
+  password: 'wrong-password'
+});
+
+// ✅ GOOD
+await useCase.execute({
+  email: 'test@example.com',
+  password: 'wrong-password',
+});
+```
+
+## Multi-line Formatting
+
+When an object or function call has **2 or more properties/arguments**, put each on its own line with a trailing comma. Never keep multiple properties inline.
+
+```typescript
+// ❌ BAD — multiple properties inline
+expect(fn).toHaveBeenCalledWith({ sub: 1, email: 'test@example.com' });
+const user = { email: 'a@b.com', name: 'Test', password: 'pass' };
+await useCase.execute({ email: 'a@b.com', password: 'pass' });
+
+// ✅ GOOD — each property on its own line
+expect(fn).toHaveBeenCalledWith({
+  sub: 1,
+  email: 'test@example.com',
+});
+const user = {
+  email: 'a@b.com',
+  name: 'Test',
+  password: 'pass',
+};
+await useCase.execute({
+  email: 'a@b.com',
+  password: 'pass',
+});
+```
+
+Single-property objects may stay inline:
+
+```typescript
+// ✅ OK — single property
+await repo.findById({ id: 1 });
+```
+
+## Single Quotes
+
+Always use single quotes for strings, except when the string itself contains a single quote.
+
+```typescript
+// ❌ BAD
+const name = "Test User";
+
+// ✅ GOOD
+const name = 'Test User';
+```
