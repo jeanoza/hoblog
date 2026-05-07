@@ -1,0 +1,10 @@
+---
+alwaysApply: true
+---
+
+Prisma:
+
+- PostgreSQL only
+- schema kept minimal
+- no over-normalization early
+- migrations required for changes

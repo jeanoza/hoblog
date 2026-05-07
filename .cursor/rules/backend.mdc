@@ -1,0 +1,11 @@
+---
+alwaysApply: true
+---
+
+Backend (NestJS):
+
+- use modules per feature
+- presentation / application / domain / infrastructure
+- Prisma only in infrastructure
+- avoid global services
+- keep controllers thin

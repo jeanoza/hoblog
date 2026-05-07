@@ -1,0 +1,10 @@
+---
+alwaysApply: true
+---
+
+Frontend (Next.js):
+
+- App Router only
+- server components preferred
+- minimal state management
+- Tailwind for styling
