@@ -83,6 +83,60 @@ describe('Categories (e2e)', () => {
     });
   });
 
+  describe('PATCH /categories/:id', () => {
+    it('renames an owned category', async () => {
+      const createRes = await request(app.getHttpServer())
+        .post('/categories')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({ name: 'To Rename' })
+        .expect(201);
+
+      const created = createRes.body as { id: number };
+
+      const res = await request(app.getHttpServer())
+        .patch(`/categories/${created.id}`)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({ name: 'Renamed' })
+        .expect(200);
+
+      const body = res.body as { name: string };
+      expect(body.name).toBe('Renamed');
+    });
+
+    it('returns 409 when new name already exists', async () => {
+      const first = await request(app.getHttpServer())
+        .post('/categories')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({ name: 'Conflict Source' })
+        .expect(201);
+
+      await request(app.getHttpServer())
+        .post('/categories')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({ name: 'Conflict Target' })
+        .expect(201);
+
+      const { id } = first.body as { id: number };
+      await request(app.getHttpServer())
+        .patch(`/categories/${id}`)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({ name: 'Conflict Target' })
+        .expect(409);
+    });
+
+    it('returns 404 when category does not exist', async () => {
+      await request(app.getHttpServer())
+        .patch('/categories/999999')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({ name: 'Ghost' })
+        .expect(404);
+    });
+
+    it('returns 401 when not authenticated', async () => {
+      await request(app.getHttpServer()).patch('/categories/1').send({ name: 'Test' }).expect(401);
+    });
+  });
+
   describe('DELETE /categories/:id', () => {
     it('deletes an owned category', async () => {
       const createRes = await request(app.getHttpServer())

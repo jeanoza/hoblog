@@ -6,6 +6,7 @@ const mockRepo: jest.Mocked<ICategoryRepository> = {
   findAllByUserId: jest.fn(),
   findById: jest.fn(),
   create: jest.fn(),
+  update: jest.fn(),
   delete: jest.fn(),
 };
 

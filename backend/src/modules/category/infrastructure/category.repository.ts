@@ -25,6 +25,14 @@ export class CategoryRepository implements ICategoryRepository {
     return new CategoryEntity(category);
   }
 
+  async update(id: number, name: string): Promise<CategoryEntity> {
+    const category = await this.prisma.category.update({
+      where: { id },
+      data: { name },
+    });
+    return new CategoryEntity(category);
+  }
+
   async delete(id: number): Promise<void> {
     await this.prisma.category.delete({ where: { id } });
   }
