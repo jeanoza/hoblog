@@ -10,7 +10,7 @@ async function bootstrap() {
     origin: process.env.FRONTEND_URL ?? 'http://localhost:20001',
     credentials: true,
   });
-  app.use(cookieParser());
+  app.use(cookieParser(process.env.COOKIE_SECRET));
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
   const port = process.env.PORT ?? 3001;
   await app.listen(port);

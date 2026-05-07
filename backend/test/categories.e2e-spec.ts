@@ -15,7 +15,10 @@ describe('Categories (e2e)', () => {
 
     app = await bootstrapE2eApp(moduleFixture);
     agent = request.agent(app.getHttpServer());
-    await agent.post('/auth/login').send({ email: 'admin@hoblog.com', password: 'password123' }).expect(200);
+    await agent
+      .post('/auth/login')
+      .send({ email: 'admin@hoblog.com', password: 'password123' })
+      .expect(200);
   });
 
   afterAll(async () => {
@@ -68,7 +71,10 @@ describe('Categories (e2e)', () => {
 
       const created = createRes.body as { id: number };
 
-      const res = await agent.patch(`/categories/${created.id}`).send({ name: 'Renamed' }).expect(200);
+      const res = await agent
+        .patch(`/categories/${created.id}`)
+        .send({ name: 'Renamed' })
+        .expect(200);
 
       const body = res.body as { name: string };
       expect(body.name).toBe('Renamed');
