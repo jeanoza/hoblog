@@ -20,5 +20,6 @@ import { ActivityController } from './presentation/activity.controller';
     UpdateActivityUseCase,
     DeleteActivityUseCase,
   ],
+  exports: [ACTIVITY_REPOSITORY],
 })
 export class ActivityModule {}

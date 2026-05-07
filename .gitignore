@@ -40,3 +40,6 @@ Thumbs.db
 
 # Coverage
 coverage/
+
+# Google Cloud Storage
+gcp-key.json

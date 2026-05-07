@@ -37,4 +37,14 @@ model Activity {
   categoryId Int
   user       User     @relation(fields: [userId], references: [id])
   category   Category @relation(fields: [categoryId], references: [id])
+  photos     Photo[]
+}
+
+model Photo {
+  id         Int      @id @default(autoincrement())
+  url        String
+  order      Int      @default(0)
+  createdAt  DateTime @default(now())
+  activityId Int
+  activity   Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
 }
