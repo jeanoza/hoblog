@@ -21,6 +21,18 @@ describe('Auth (e2e)', () => {
     await app.close();
   });
 
+  let accessToken: string;
+  let refreshToken: string;
+
+  beforeEach(async () => {
+    const res = await request(app.getHttpServer())
+      .post('/auth/login')
+      .send({ email: 'admin@hoblog.com', password: 'password123' });
+    const body = res.body as { accessToken: string; refreshToken: string };
+    accessToken = body.accessToken;
+    refreshToken = body.refreshToken;
+  });
+
   describe('POST /auth/login', () => {
     it('returns accessToken when credentials are valid', async () => {
       const res = await request(app.getHttpServer())
@@ -56,6 +68,38 @@ describe('Auth (e2e)', () => {
 
     it('returns 400 when required fields are missing', async () => {
       await request(app.getHttpServer()).post('/auth/login').send({ email: 'admin@hoblog.com' }).expect(400);
+    });
+  });
+
+  describe('POST /auth/logout', () => {
+    it('returns 204 when logged out with valid token', async () => {
+      await request(app.getHttpServer())
+        .post('/auth/logout')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .expect(204);
+    });
+
+    it('returns 401 when no token is provided', async () => {
+      await request(app.getHttpServer()).post('/auth/logout').expect(401);
+    });
+
+    it('returns 401 when token is invalid', async () => {
+      await request(app.getHttpServer())
+        .post('/auth/logout')
+        .set('Authorization', 'Bearer invalid.token.here')
+        .expect(401);
+    });
+
+    it('invalidates the refresh token after logout', async () => {
+      await request(app.getHttpServer())
+        .post('/auth/logout')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .expect(204);
+
+      await request(app.getHttpServer())
+        .post('/auth/refresh')
+        .send({ refreshToken })
+        .expect(401);
     });
   });
 });

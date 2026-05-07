@@ -14,20 +14,25 @@ Always apply these rules when writing or editing code.
 
 ## Trailing Commas
 
-Add a trailing comma after the last item in multi-line objects, arrays, function arguments, and destructuring.
+`trailingComma: "es5"` — objects and arrays get trailing commas, **function/constructor parameters do NOT**.
 
 ```typescript
-// ❌ BAD
-await useCase.execute({
-  email: 'test@example.com',
-  password: 'wrong-password'
-});
-
-// ✅ GOOD
+// ✅ GOOD — object: trailing comma
 await useCase.execute({
   email: 'test@example.com',
   password: 'wrong-password',
 });
+
+// ✅ GOOD — constructor/function parameters: NO trailing comma
+constructor(
+  private readonly userRepository: IUserRepository,  // ❌ BAD
+  private readonly jwtService: JwtService             // ✅ no trailing comma
+) {}
+
+// ✅ GOOD — single-param constructor: NO trailing comma
+constructor(
+  private readonly userRepository: IUserRepository  // no trailing comma
+) {}
 ```
 
 ## Multi-line Formatting
