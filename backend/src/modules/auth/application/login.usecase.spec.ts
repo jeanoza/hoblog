@@ -13,7 +13,10 @@ const mockUserRepository: jest.Mocked<IUserRepository> = {
 };
 
 const mockJwtService = {
-  sign: jest.fn().mockReturnValueOnce('mock.access.token').mockReturnValueOnce('mock.refresh.token'),
+  sign: jest
+    .fn()
+    .mockReturnValueOnce('mock.access.token')
+    .mockReturnValueOnce('mock.refresh.token'),
 } as unknown as JwtService;
 
 describe('LoginUseCase', () => {

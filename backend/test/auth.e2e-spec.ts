@@ -67,7 +67,10 @@ describe('Auth (e2e)', () => {
     });
 
     it('returns 400 when required fields are missing', async () => {
-      await request(app.getHttpServer()).post('/auth/login').send({ email: 'admin@hoblog.com' }).expect(400);
+      await request(app.getHttpServer())
+        .post('/auth/login')
+        .send({ email: 'admin@hoblog.com' })
+        .expect(400);
     });
   });
 
@@ -96,6 +99,7 @@ describe('Auth (e2e)', () => {
         .set('Authorization', `Bearer ${accessToken}`)
         .expect(204);
 
+      // prettier-ignore
       await request(app.getHttpServer())
         .post('/auth/refresh')
         .send({ refreshToken })
