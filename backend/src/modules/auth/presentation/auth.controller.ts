@@ -21,7 +21,7 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  login(@Body() dto: LoginDto) {
+  login(@Body() dto: LoginDto): Promise<{ accessToken: string; refreshToken: string }> {
     return this.loginUseCase.execute(dto);
   }
 
