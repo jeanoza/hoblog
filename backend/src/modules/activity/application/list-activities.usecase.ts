@@ -1,5 +1,6 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { ACTIVITY_REPOSITORY, IActivityRepository } from '../domain/activity.repository.interface';
+import { ACTIVITY_REPOSITORY } from '../domain/activity.repository.interface';
+import type { IActivityRepository } from '../domain/activity.repository.interface';
 import { ActivityEntity } from '../domain/activity.entity';
 
 @Injectable()

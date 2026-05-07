@@ -12,7 +12,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
-import { CurrentUser, AuthUser } from '../../../common/decorators/current-user.decorator';
+import { CurrentUser, type AuthUser } from '../../../common/decorators/current-user.decorator';
 import { CreateActivityUseCase } from '../application/create-activity.usecase';
 import { ListActivitiesUseCase } from '../application/list-activities.usecase';
 import { GetActivityUseCase } from '../application/get-activity.usecase';

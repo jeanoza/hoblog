@@ -10,6 +10,7 @@ const mockUserRepository: jest.Mocked<IUserRepository> = {
   findById: jest.fn(),
   create: jest.fn(),
   updateRefreshToken: jest.fn().mockResolvedValue(undefined),
+  update: jest.fn(),
 };
 
 const mockJwtService = {

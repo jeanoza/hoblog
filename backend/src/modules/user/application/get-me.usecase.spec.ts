@@ -8,6 +8,7 @@ const mockUserRepository: jest.Mocked<IUserRepository> = {
   findById: jest.fn(),
   create: jest.fn(),
   updateRefreshToken: jest.fn(),
+  update: jest.fn(),
 };
 
 const mockUser = new UserEntity({

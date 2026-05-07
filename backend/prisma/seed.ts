@@ -5,7 +5,7 @@ import * as bcrypt from 'bcrypt';
 export async function seed(prisma: PrismaClient) {
   const passwordHash = await bcrypt.hash('password123', 10);
 
-  await prisma.user.upsert({
+  const admin = await prisma.user.upsert({
     where: { email: 'admin@hoblog.com' },
     update: {},
     create: {
@@ -15,16 +15,14 @@ export async function seed(prisma: PrismaClient) {
     },
   });
 
-  await prisma.category.createMany({
-    skipDuplicates: true,
-    data: [
-      { name: 'Running' },
-      { name: 'Reading' },
-      { name: 'Cooking' },
-      { name: 'Gaming' },
-      { name: 'Cycling' },
-    ],
-  });
+  const defaultCategories = ['Running', 'Reading', 'Cooking', 'Gaming', 'Cycling'];
+  for (const name of defaultCategories) {
+    await prisma.category.upsert({
+      where: { userId_name: { userId: admin.id, name } },
+      update: {},
+      create: { name, userId: admin.id },
+    });
+  }
 }
 
 async function main() {

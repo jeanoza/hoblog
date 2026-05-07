@@ -14,12 +14,17 @@ model User {
   refreshTokenHash String?
   createdAt        DateTime   @default(now())
   activities       Activity[]
+  categories       Category[]
 }
 
 model Category {
   id         Int        @id @default(autoincrement())
-  name       String     @unique
+  name       String
+  userId     Int
   activities Activity[]
+  user       User       @relation(fields: [userId], references: [id])
+
+  @@unique([userId, name])
 }
 
 model Activity {

@@ -5,6 +5,7 @@ export interface IUserRepository {
   findByEmail(email: string): Promise<UserEntity | null>;
   create(data: { email: string; name: string; passwordHash: string }): Promise<UserEntity>;
   updateRefreshToken(id: number, hash: string | null): Promise<void>;
+  update(id: number, data: { name?: string }): Promise<UserEntity>;
 }
 
 export const USER_REPOSITORY = Symbol('USER_REPOSITORY');

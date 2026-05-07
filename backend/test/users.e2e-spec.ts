@@ -57,11 +57,39 @@ describe('Users (e2e)', () => {
     });
 
     it('returns 401 when token is invalid', async () => {
-      // prettier-ignore
       await request(app.getHttpServer())
         .get('/users/me')
         .set('Authorization', 'Bearer invalid.token.here')
         .expect(401);
+    });
+  });
+
+  describe('PATCH /users/me', () => {
+    it('updates the user name', async () => {
+      const res = await request(app.getHttpServer())
+        .patch('/users/me')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({ name: 'Updated Name' })
+        .expect(200);
+
+      const body = res.body as { name: string; email: string };
+      expect(body.name).toBe('Updated Name');
+      expect(body.email).toBe('admin@hoblog.com');
+    });
+
+    it('does not expose sensitive fields after update', async () => {
+      const res = await request(app.getHttpServer())
+        .patch('/users/me')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({ name: 'Admin' })
+        .expect(200);
+
+      expect(res.body).not.toHaveProperty('passwordHash');
+      expect(res.body).not.toHaveProperty('refreshTokenHash');
+    });
+
+    it('returns 401 when not authenticated', async () => {
+      await request(app.getHttpServer()).patch('/users/me').send({ name: 'Hacker' }).expect(401);
     });
   });
 });

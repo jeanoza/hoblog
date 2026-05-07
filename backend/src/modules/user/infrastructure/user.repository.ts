@@ -27,9 +27,12 @@ export class UserRepository implements IUserRepository {
   async updateRefreshToken(id: number, hash: string | null): Promise<void> {
     await this.prisma.user.update({
       where: { id },
-      data: {
-        refreshTokenHash: hash,
-      },
+      data: { refreshTokenHash: hash },
     });
+  }
+
+  async update(id: number, data: { name?: string }): Promise<UserEntity> {
+    const user = await this.prisma.user.update({ where: { id }, data });
+    return new UserEntity(user);
   }
 }
