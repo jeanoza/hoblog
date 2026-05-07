@@ -10,17 +10,24 @@ export class UserRepository implements IUserRepository {
   async findById(id: number): Promise<UserEntity | null> {
     const user = await this.prisma.user.findUnique({ where: { id } });
     if (!user) return null;
-    return new UserEntity(user.id, user.email, user.name, user.passwordHash, user.createdAt);
+    return new UserEntity(user.id, user.email, user.name, user.passwordHash, user.createdAt, user.refreshTokenHash);
   }
 
   async findByEmail(email: string): Promise<UserEntity | null> {
     const user = await this.prisma.user.findUnique({ where: { email } });
     if (!user) return null;
-    return new UserEntity(user.id, user.email, user.name, user.passwordHash, user.createdAt);
+    return new UserEntity(user.id, user.email, user.name, user.passwordHash, user.createdAt, user.refreshTokenHash);
   }
 
   async create(data: { email: string; name: string; passwordHash: string }): Promise<UserEntity> {
     const user = await this.prisma.user.create({ data });
-    return new UserEntity(user.id, user.email, user.name, user.passwordHash, user.createdAt);
+    return new UserEntity(user.id, user.email, user.name, user.passwordHash, user.createdAt, user.refreshTokenHash);
+  }
+
+  async updateRefreshToken(id: number, hash: string | null): Promise<void> {
+    await this.prisma.user.update({
+      where: { id },
+      data: { refreshTokenHash: hash },
+    });
   }
 }

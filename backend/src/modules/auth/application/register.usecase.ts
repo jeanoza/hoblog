@@ -1,8 +1,8 @@
 import { Injectable, ConflictException, Inject } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import type { IUserRepository } from '../../user/domain/user.repository.interface';
 import { USER_REPOSITORY } from '../../user/domain/user.repository.interface';
+import { LoginUseCase } from './login.usecase';
 
 interface RegisterInput {
   email: string;
@@ -15,10 +15,10 @@ export class RegisterUseCase {
   constructor(
     @Inject(USER_REPOSITORY)
     private readonly userRepository: IUserRepository,
-    private readonly jwtService: JwtService,
+    private readonly loginUseCase: LoginUseCase,
   ) {}
 
-  async execute(input: RegisterInput): Promise<{ accessToken: string }> {
+  async execute(input: RegisterInput): Promise<{ accessToken: string; refreshToken: string }> {
     const existing = await this.userRepository.findByEmail(input.email);
     if (existing) {
       throw new ConflictException('Email already in use');
@@ -31,10 +31,6 @@ export class RegisterUseCase {
       passwordHash,
     });
 
-    const accessToken = this.jwtService.sign({
-      sub: user.id,
-      email: user.email,
-    });
-    return { accessToken };
+    return this.loginUseCase.issueTokens(user.id, user.email);
   }
 }

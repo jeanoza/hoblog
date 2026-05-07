@@ -5,18 +5,21 @@ import { UserModule } from '../user/user.module';
 import { AuthController } from './presentation/auth.controller';
 import { RegisterUseCase } from './application/register.usecase';
 import { LoginUseCase } from './application/login.usecase';
+import { RefreshUseCase } from './application/refresh.usecase';
 import { JwtStrategy } from './infrastructure/jwt.strategy';
-
+import { JwtSignOptions } from '@nestjs/jwt';
 @Module({
   imports: [
     UserModule,
     PassportModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET ?? 'changeme',
-      signOptions: { expiresIn: '15m' },
+      signOptions: {
+        expiresIn: process.env.JWT_EXPIRES_IN ?? '15m',
+      } as JwtSignOptions,
     }),
   ],
   controllers: [AuthController],
-  providers: [RegisterUseCase, LoginUseCase, JwtStrategy],
+  providers: [LoginUseCase, RegisterUseCase, RefreshUseCase, JwtStrategy],
 })
 export class AuthModule {}

@@ -9,10 +9,14 @@ const mockUserRepository: jest.Mocked<IUserRepository> = {
   findByEmail: jest.fn(),
   findById: jest.fn(),
   create: jest.fn(),
+  updateRefreshToken: jest.fn().mockResolvedValue(undefined),
 };
 
 const mockJwtService = {
-  sign: jest.fn().mockReturnValue('mock.access.token'),
+  sign: jest
+    .fn()
+    .mockReturnValueOnce('mock.access.token')
+    .mockReturnValueOnce('mock.refresh.token'),
 } as unknown as JwtService;
 
 describe('LoginUseCase', () => {
@@ -28,7 +32,7 @@ describe('LoginUseCase', () => {
     useCase = new LoginUseCase(mockUserRepository, mockJwtService);
   });
 
-  it('should return an access token for valid credentials', async () => {
+  it('should return an access token and refresh token for valid credentials', async () => {
     const user = new UserEntity(
       1,
       'test@example.com',
@@ -43,11 +47,14 @@ describe('LoginUseCase', () => {
       password: 'correct-password',
     });
 
-    expect(result).toEqual({ accessToken: 'mock.access.token' });
-    expect(mockJwtService.sign).toHaveBeenCalledWith({
-      sub: 1,
-      email: 'test@example.com',
+    expect(result).toEqual({
+      accessToken: 'mock.access.token',
+      refreshToken: 'mock.refresh.token',
     });
+    expect(mockUserRepository.updateRefreshToken).toHaveBeenCalledWith(
+      1,
+      expect.any(String),
+    );
   });
 
   it('should throw UnauthorizedException if user is not found', async () => {

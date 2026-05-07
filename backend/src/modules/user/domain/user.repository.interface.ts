@@ -8,6 +8,7 @@ export interface IUserRepository {
     name: string;
     passwordHash: string;
   }): Promise<UserEntity>;
+  updateRefreshToken(id: number, hash: string | null): Promise<void>;
 }
 
 export const USER_REPOSITORY = Symbol('USER_REPOSITORY');

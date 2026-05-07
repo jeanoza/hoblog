@@ -1,6 +1,6 @@
 import { ConflictException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import { RegisterUseCase } from './register.usecase';
+import { LoginUseCase } from './login.usecase';
 import type { IUserRepository } from '../../user/domain/user.repository.interface';
 import { UserEntity } from '../../user/domain/user.entity';
 
@@ -16,21 +16,25 @@ const mockUserRepository: jest.Mocked<IUserRepository> = {
   findByEmail: jest.fn(),
   findById: jest.fn(),
   create: jest.fn(),
+  updateRefreshToken: jest.fn().mockResolvedValue(undefined),
 };
 
-const mockJwtService = {
-  sign: jest.fn().mockReturnValue('mock.access.token'),
-} as unknown as JwtService;
+const mockLoginUseCase = {
+  issueTokens: jest.fn().mockResolvedValue({
+    accessToken: 'mock.access.token',
+    refreshToken: 'mock.refresh.token',
+  }),
+} as unknown as LoginUseCase;
 
 describe('RegisterUseCase', () => {
   let useCase: RegisterUseCase;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useCase = new RegisterUseCase(mockUserRepository, mockJwtService);
+    useCase = new RegisterUseCase(mockUserRepository, mockLoginUseCase);
   });
 
-  it('should register a new user and return an access token', async () => {
+  it('should register a new user and return an access token and refresh token', async () => {
     mockUserRepository.findByEmail.mockResolvedValue(null);
     mockUserRepository.create.mockResolvedValue(mockUser);
 
@@ -40,7 +44,10 @@ describe('RegisterUseCase', () => {
       password: 'password123',
     });
 
-    expect(result).toEqual({ accessToken: 'mock.access.token' });
+    expect(result).toEqual({
+      accessToken: 'mock.access.token',
+      refreshToken: 'mock.refresh.token',
+    });
     expect(mockUserRepository.findByEmail).toHaveBeenCalledWith(
       'test@example.com',
     );
