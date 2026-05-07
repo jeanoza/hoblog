@@ -4,12 +4,12 @@ A personal hobby life-log web application.
 
 ## Stack
 
-| Layer    | Technology              |
-|----------|-------------------------|
-| Frontend | Next.js (TypeScript, App Router) |
+| Layer    | Technology                              |
+|----------|-----------------------------------------|
+| Frontend | Next.js (TypeScript, App Router)        |
 | Backend  | NestJS (TypeScript, Clean Architecture) |
-| ORM      | Prisma                  |
-| Database | PostgreSQL (Docker)     |
+| ORM      | Prisma                                  |
+| Database | PostgreSQL (Docker)                     |
 
 ## Project Structure
 
@@ -26,7 +26,6 @@ hoblog/
 
 ```bash
 cd db
-cp .env .env  # already provided
 docker compose up -d
 ```
 
@@ -36,14 +35,14 @@ docker compose up -d
 cd backend
 cp .env.example .env
 npm install
-npm run prisma:generate
-npm run prisma:migrate
+npm run generate
+npm run migrate
 npm run start:dev
 ```
 
-Backend runs at: http://localhost:3001
+Backend runs at: http://localhost:20002
 
-Health check: http://localhost:3001/health
+Health check: http://localhost:20002/health
 
 ### 3. Start the frontend
 
@@ -54,4 +53,14 @@ npm install
 npm run dev
 ```
 
-Frontend runs at: http://localhost:3000
+Frontend runs at: http://localhost:20001
+
+## Prisma
+
+| Command | Description |
+|---------|-------------|
+| `npm run generate` | Regenerate Prisma client after schema changes |
+| `npm run migrate` | Create and apply a new migration (dev) |
+| `npm run migrate:deploy` | Apply pending migrations (production) |
+| `npm run migrate:status` | Check migration status |
+| `npm run seed` | Seed the database with initial data |
