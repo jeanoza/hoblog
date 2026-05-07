@@ -17,9 +17,7 @@ export default async function globalSetup() {
   const prisma = new PrismaClient({ adapter });
 
   try {
-    await prisma.$executeRawUnsafe(
-      'TRUNCATE TABLE "User", "Category", "Activity" RESTART IDENTITY CASCADE',
-    );
+    await prisma.$executeRawUnsafe('TRUNCATE TABLE "User", "Category", "Activity" RESTART IDENTITY CASCADE');
     await seed(prisma);
   } finally {
     await prisma.$disconnect();

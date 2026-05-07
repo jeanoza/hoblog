@@ -8,7 +8,7 @@ alwaysApply: false
 
 This project uses prettier with the following config (`backend/.prettierrc`):
 - `singleQuote: true`
-- `trailingComma: "all"`
+- `trailingComma: "es5"`
 
 Always apply these rules when writing or editing code.
 

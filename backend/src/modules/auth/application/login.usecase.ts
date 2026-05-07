@@ -19,7 +19,7 @@ export class LoginUseCase {
   constructor(
     @Inject(USER_REPOSITORY)
     private readonly userRepository: IUserRepository,
-    private readonly jwtService: JwtService,
+    private readonly jwtService: JwtService
   ) {}
 
   async execute(input: LoginInput): Promise<AuthTokens> {

@@ -4,13 +4,13 @@ import { LoginUseCase } from './login.usecase';
 import type { IUserRepository } from '../../user/domain/user.repository.interface';
 import { UserEntity } from '../../user/domain/user.entity';
 
-const mockUser = new UserEntity(
-  1,
-  'test@example.com',
-  'Test User',
-  'hashed',
-  new Date(),
-);
+const mockUser = new UserEntity({
+  id: 1,
+  email: 'test@example.com',
+  name: 'Test User',
+  passwordHash: 'hashed',
+  createdAt: new Date(),
+});
 
 const mockUserRepository: jest.Mocked<IUserRepository> = {
   findByEmail: jest.fn(),
@@ -48,14 +48,12 @@ describe('RegisterUseCase', () => {
       accessToken: 'mock.access.token',
       refreshToken: 'mock.refresh.token',
     });
-    expect(mockUserRepository.findByEmail).toHaveBeenCalledWith(
-      'test@example.com',
-    );
+    expect(mockUserRepository.findByEmail).toHaveBeenCalledWith('test@example.com');
     expect(mockUserRepository.create).toHaveBeenCalledWith(
       expect.objectContaining({
         email: 'test@example.com',
         name: 'Test User',
-      }),
+      })
     );
   });
 
@@ -67,7 +65,7 @@ describe('RegisterUseCase', () => {
         email: 'test@example.com',
         name: 'Test User',
         password: 'password123',
-      }),
+      })
     ).rejects.toThrow(ConflictException);
 
     expect(mockUserRepository.create).not.toHaveBeenCalled();

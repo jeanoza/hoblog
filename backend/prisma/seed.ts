@@ -17,13 +17,7 @@ export async function seed(prisma: PrismaClient) {
 
   await prisma.category.createMany({
     skipDuplicates: true,
-    data: [
-      { name: 'Running' },
-      { name: 'Reading' },
-      { name: 'Cooking' },
-      { name: 'Gaming' },
-      { name: 'Cycling' },
-    ],
+    data: [{ name: 'Running' }, { name: 'Reading' }, { name: 'Cooking' }, { name: 'Gaming' }, { name: 'Cycling' }],
   });
 }
 

@@ -15,7 +15,7 @@ export class RegisterUseCase {
   constructor(
     @Inject(USER_REPOSITORY)
     private readonly userRepository: IUserRepository,
-    private readonly loginUseCase: LoginUseCase,
+    private readonly loginUseCase: LoginUseCase
   ) {}
 
   async execute(input: RegisterInput): Promise<{ accessToken: string; refreshToken: string }> {

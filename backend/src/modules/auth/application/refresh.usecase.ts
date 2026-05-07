@@ -15,7 +15,7 @@ export class RefreshUseCase {
     @Inject(USER_REPOSITORY)
     private readonly userRepository: IUserRepository,
     private readonly jwtService: JwtService,
-    private readonly loginUseCase: LoginUseCase,
+    private readonly loginUseCase: LoginUseCase
   ) {}
 
   async execute(input: RefreshInput): Promise<{ accessToken: string; refreshToken: string }> {

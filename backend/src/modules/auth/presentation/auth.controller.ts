@@ -11,7 +11,7 @@ export class AuthController {
   constructor(
     private readonly registerUseCase: RegisterUseCase,
     private readonly loginUseCase: LoginUseCase,
-    private readonly refreshUseCase: RefreshUseCase,
+    private readonly refreshUseCase: RefreshUseCase
   ) {}
 
   @Post('register')
