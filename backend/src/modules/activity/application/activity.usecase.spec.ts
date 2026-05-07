@@ -60,7 +60,7 @@ describe('ListActivitiesUseCase', () => {
     const result = await useCase.execute(1);
 
     expect(result).toHaveLength(2);
-    expect(mockRepo.findAllByUserId).toHaveBeenCalledWith(1);
+    expect(mockRepo.findAllByUserId).toHaveBeenCalledWith(1, undefined);
   });
 });
 

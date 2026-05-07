@@ -1,4 +1,15 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  HttpCode,
+  HttpStatus,
+  UseGuards,
+  Req,
+  Res,
+  UnauthorizedException,
+} from '@nestjs/common';
+import type { Request, Response } from 'express';
 import { RegisterUseCase } from '../application/register.usecase';
 import { LoginUseCase } from '../application/login.usecase';
 import { RefreshUseCase } from '../application/refresh.usecase';
@@ -8,6 +19,11 @@ import { LoginDto } from './dto/login.dto';
 import { RefreshDto } from './dto/refresh.dto';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { CurrentUser, type AuthUser } from '../../../common/decorators/current-user.decorator';
+import {
+  REFRESH_TOKEN_COOKIE,
+  setAuthCookies,
+  clearAuthCookies,
+} from '../../../common/auth/auth-cookie';
 
 @Controller('auth')
 export class AuthController {
@@ -19,26 +35,42 @@ export class AuthController {
   ) {}
 
   @Post('register')
-  register(@Body() dto: RegisterDto) {
-    return this.registerUseCase.execute(dto);
+  @HttpCode(HttpStatus.CREATED)
+  async register(@Body() dto: RegisterDto, @Res({ passthrough: true }) res: Response) {
+    const tokens = await this.registerUseCase.execute(dto);
+    setAuthCookies(res, tokens);
+    return {};
   }
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  login(@Body() dto: LoginDto): Promise<{ accessToken: string; refreshToken: string }> {
-    return this.loginUseCase.execute(dto);
+  async login(@Body() dto: LoginDto, @Res({ passthrough: true }) res: Response) {
+    const tokens = await this.loginUseCase.execute(dto);
+    setAuthCookies(res, tokens);
+    return {};
   }
 
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
-  refresh(@Body() dto: RefreshDto) {
-    return this.refreshUseCase.execute(dto);
+  async refresh(
+    @Req() req: Request,
+    @Body() dto: RefreshDto,
+    @Res({ passthrough: true }) res: Response
+  ) {
+    const refreshToken = dto.refreshToken ?? req.cookies?.[REFRESH_TOKEN_COOKIE];
+    if (!refreshToken) {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+    const tokens = await this.refreshUseCase.execute({ refreshToken });
+    setAuthCookies(res, tokens);
+    return {};
   }
 
   @Post('logout')
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
-  logout(@CurrentUser() user: AuthUser) {
-    return this.logoutUseCase.execute(user.userId);
+  async logout(@CurrentUser() user: AuthUser, @Res({ passthrough: true }) res: Response) {
+    await this.logoutUseCase.execute(user.userId);
+    clearAuthCookies(res);
   }
 }

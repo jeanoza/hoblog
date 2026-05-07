@@ -1,27 +1,22 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
-import { App } from 'supertest/types';
 import { AppModule } from '../src/app.module';
+import { bootstrapE2eApp } from './bootstrap-e2e-app';
+import { ACCESS_TOKEN_COOKIE } from '../src/common/auth/auth-cookie';
 
 describe('Users (e2e)', () => {
-  let app: INestApplication<App>;
-  let accessToken: string;
+  let app: INestApplication;
+  let agent: ReturnType<typeof request.agent>;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
 
-    app = moduleFixture.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
-    await app.init();
-
-    const res = await request(app.getHttpServer())
-      .post('/auth/login')
-      .send({ email: 'admin@hoblog.com', password: 'password123' });
-    const body = res.body as { accessToken: string };
-    accessToken = body.accessToken;
+    app = await bootstrapE2eApp(moduleFixture);
+    agent = request.agent(app.getHttpServer());
+    await agent.post('/auth/login').send({ email: 'admin@hoblog.com', password: 'password123' }).expect(200);
   });
 
   afterAll(async () => {
@@ -30,10 +25,7 @@ describe('Users (e2e)', () => {
 
   describe('GET /users/me', () => {
     it('returns the current user profile', async () => {
-      const res = await request(app.getHttpServer())
-        .get('/users/me')
-        .set('Authorization', `Bearer ${accessToken}`)
-        .expect(200);
+      const res = await agent.get('/users/me').expect(200);
 
       const body = res.body as { id: number; email: string; name: string; createdAt: string };
       expect(body.id).toBeDefined();
@@ -43,10 +35,7 @@ describe('Users (e2e)', () => {
     });
 
     it('does not expose sensitive fields', async () => {
-      const res = await request(app.getHttpServer())
-        .get('/users/me')
-        .set('Authorization', `Bearer ${accessToken}`)
-        .expect(200);
+      const res = await agent.get('/users/me').expect(200);
 
       expect(res.body).not.toHaveProperty('passwordHash');
       expect(res.body).not.toHaveProperty('refreshTokenHash');
@@ -59,18 +48,14 @@ describe('Users (e2e)', () => {
     it('returns 401 when token is invalid', async () => {
       await request(app.getHttpServer())
         .get('/users/me')
-        .set('Authorization', 'Bearer invalid.token.here')
+        .set('Cookie', `${ACCESS_TOKEN_COOKIE}=invalid.token.here`)
         .expect(401);
     });
   });
 
   describe('PATCH /users/me', () => {
     it('updates the user name', async () => {
-      const res = await request(app.getHttpServer())
-        .patch('/users/me')
-        .set('Authorization', `Bearer ${accessToken}`)
-        .send({ name: 'Updated Name' })
-        .expect(200);
+      const res = await agent.patch('/users/me').send({ name: 'Updated Name' }).expect(200);
 
       const body = res.body as { name: string; email: string };
       expect(body.name).toBe('Updated Name');
@@ -78,11 +63,7 @@ describe('Users (e2e)', () => {
     });
 
     it('does not expose sensitive fields after update', async () => {
-      const res = await request(app.getHttpServer())
-        .patch('/users/me')
-        .set('Authorization', `Bearer ${accessToken}`)
-        .send({ name: 'Admin' })
-        .expect(200);
+      const res = await agent.patch('/users/me').send({ name: 'Admin' }).expect(200);
 
       expect(res.body).not.toHaveProperty('passwordHash');
       expect(res.body).not.toHaveProperty('refreshTokenHash');

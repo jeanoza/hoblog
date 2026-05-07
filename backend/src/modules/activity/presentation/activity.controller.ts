@@ -6,6 +6,7 @@ import {
   Delete,
   Body,
   Param,
+  Query,
   ParseIntPipe,
   HttpCode,
   HttpStatus,
@@ -42,8 +43,17 @@ export class ActivityController {
   }
 
   @Get()
-  list(@CurrentUser() user: AuthUser) {
-    return this.listActivitiesUseCase.execute(user.userId);
+  list(
+    @CurrentUser() user: AuthUser,
+    @Query('skip') skip?: string,
+    @Query('take') take?: string,
+    @Query('categoryId') categoryId?: string
+  ) {
+    return this.listActivitiesUseCase.execute(user.userId, {
+      skip: skip !== undefined ? parseInt(skip) : undefined,
+      take: take !== undefined ? parseInt(take) : undefined,
+      categoryId: categoryId !== undefined ? parseInt(categoryId) : undefined,
+    });
   }
 
   @Get(':id')

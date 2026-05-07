@@ -2,7 +2,10 @@ import { ActivityEntity } from './activity.entity';
 
 export interface IActivityRepository {
   findById(id: number): Promise<ActivityEntity | null>;
-  findAllByUserId(userId: number): Promise<ActivityEntity[]>;
+  findAllByUserId(
+    userId: number,
+    options?: { skip?: number; take?: number; categoryId?: number }
+  ): Promise<ActivityEntity[]>;
   create(data: {
     title: string;
     note?: string | null;

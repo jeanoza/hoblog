@@ -10,7 +10,10 @@ export class ListActivitiesUseCase {
     private readonly activityRepository: IActivityRepository
   ) {}
 
-  execute(userId: number): Promise<ActivityEntity[]> {
-    return this.activityRepository.findAllByUserId(userId);
+  execute(
+    userId: number,
+    options?: { skip?: number; take?: number; categoryId?: number }
+  ): Promise<ActivityEntity[]> {
+    return this.activityRepository.findAllByUserId(userId, options);
   }
 }

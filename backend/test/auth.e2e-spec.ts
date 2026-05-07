@@ -1,48 +1,38 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
-import { App } from 'supertest/types';
 import { AppModule } from '../src/app.module';
+import { bootstrapE2eApp } from './bootstrap-e2e-app';
+import { ACCESS_TOKEN_COOKIE, REFRESH_TOKEN_COOKIE } from '../src/common/auth/auth-cookie';
 
 describe('Auth (e2e)', () => {
-  let app: INestApplication<App>;
+  let app: Awaited<ReturnType<typeof bootstrapE2eApp>>;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
 
-    app = moduleFixture.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
-    await app.init();
+    app = await bootstrapE2eApp(moduleFixture);
   });
 
   afterAll(async () => {
     await app.close();
   });
 
-  let accessToken: string;
-  let refreshToken: string;
-
-  beforeEach(async () => {
-    const res = await request(app.getHttpServer())
-      .post('/auth/login')
-      .send({ email: 'admin@hoblog.com', password: 'password123' });
-    const body = res.body as { accessToken: string; refreshToken: string };
-    accessToken = body.accessToken;
-    refreshToken = body.refreshToken;
-  });
-
   describe('POST /auth/login', () => {
-    it('returns accessToken when credentials are valid', async () => {
+    it('sets httpOnly auth cookies when credentials are valid', async () => {
       const res = await request(app.getHttpServer())
         .post('/auth/login')
         .send({ email: 'admin@hoblog.com', password: 'password123' })
         .expect(200);
 
-      const body = res.body as { accessToken: string };
-      expect(body.accessToken).toBeDefined();
-      expect(typeof body.accessToken).toBe('string');
+      expect(res.body).toEqual({});
+      const raw = res.headers['set-cookie'];
+      const cookies = Array.isArray(raw) ? raw : raw ? [raw] : [];
+      expect(cookies.length).toBeGreaterThan(0);
+      expect(cookies.some((c) => c.startsWith(`${ACCESS_TOKEN_COOKIE}=`))).toBe(true);
+      expect(cookies.some((c) => c.startsWith(`${REFRESH_TOKEN_COOKIE}=`))).toBe(true);
+      expect(cookies.every((c) => c.toLowerCase().includes('httponly'))).toBe(true);
     });
 
     it('returns 401 when password is wrong', async () => {
@@ -75,11 +65,10 @@ describe('Auth (e2e)', () => {
   });
 
   describe('POST /auth/logout', () => {
-    it('returns 204 when logged out with valid token', async () => {
-      await request(app.getHttpServer())
-        .post('/auth/logout')
-        .set('Authorization', `Bearer ${accessToken}`)
-        .expect(204);
+    it('returns 204 when logged out with valid session cookie', async () => {
+      const agent = request.agent(app.getHttpServer());
+      await agent.post('/auth/login').send({ email: 'admin@hoblog.com', password: 'password123' }).expect(200);
+      await agent.post('/auth/logout').expect(204);
     });
 
     it('returns 401 when no token is provided', async () => {
@@ -89,21 +78,15 @@ describe('Auth (e2e)', () => {
     it('returns 401 when token is invalid', async () => {
       await request(app.getHttpServer())
         .post('/auth/logout')
-        .set('Authorization', 'Bearer invalid.token.here')
+        .set('Cookie', `${ACCESS_TOKEN_COOKIE}=invalid.token.here`)
         .expect(401);
     });
 
     it('invalidates the refresh token after logout', async () => {
-      await request(app.getHttpServer())
-        .post('/auth/logout')
-        .set('Authorization', `Bearer ${accessToken}`)
-        .expect(204);
-
-      // prettier-ignore
-      await request(app.getHttpServer())
-        .post('/auth/refresh')
-        .send({ refreshToken })
-        .expect(401);
+      const agent = request.agent(app.getHttpServer());
+      await agent.post('/auth/login').send({ email: 'admin@hoblog.com', password: 'password123' }).expect(200);
+      await agent.post('/auth/logout').expect(204);
+      await agent.post('/auth/refresh').send({}).expect(401);
     });
   });
 });

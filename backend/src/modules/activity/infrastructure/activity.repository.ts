@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service';
-import { IActivityRepository } from '../domain/activity.repository.interface';
+import type { IActivityRepository } from '../domain/activity.repository.interface';
 import { ActivityEntity } from '../domain/activity.entity';
 
 @Injectable()
@@ -13,10 +13,15 @@ export class ActivityRepository implements IActivityRepository {
     return new ActivityEntity(activity);
   }
 
-  async findAllByUserId(userId: number): Promise<ActivityEntity[]> {
+  async findAllByUserId(
+    userId: number,
+    options?: { skip?: number; take?: number; categoryId?: number }
+  ): Promise<ActivityEntity[]> {
     const activities = await this.prisma.activity.findMany({
-      where: { userId },
+      where: { userId, ...(options?.categoryId ? { categoryId: options.categoryId } : {}) },
       orderBy: { date: 'desc' },
+      skip: options?.skip,
+      take: options?.take,
     });
     return activities.map((a) => new ActivityEntity(a));
   }

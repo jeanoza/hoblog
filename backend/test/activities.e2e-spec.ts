@@ -1,12 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
-import { App } from 'supertest/types';
 import { AppModule } from '../src/app.module';
+import { bootstrapE2eApp } from './bootstrap-e2e-app';
 
 describe('Activities (e2e)', () => {
-  let app: INestApplication<App>;
-  let accessToken: string;
+  let app: INestApplication;
+  let agent: ReturnType<typeof request.agent>;
   let createdId: number;
 
   beforeAll(async () => {
@@ -14,14 +14,9 @@ describe('Activities (e2e)', () => {
       imports: [AppModule],
     }).compile();
 
-    app = moduleFixture.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
-    await app.init();
-
-    const res = await request(app.getHttpServer())
-      .post('/auth/login')
-      .send({ email: 'admin@hoblog.com', password: 'password123' });
-    accessToken = (res.body as { accessToken: string }).accessToken;
+    app = await bootstrapE2eApp(moduleFixture);
+    agent = request.agent(app.getHttpServer());
+    await agent.post('/auth/login').send({ email: 'admin@hoblog.com', password: 'password123' }).expect(200);
   });
 
   afterAll(async () => {
@@ -30,9 +25,8 @@ describe('Activities (e2e)', () => {
 
   describe('POST /activities', () => {
     it('creates an activity and returns it', async () => {
-      const res = await request(app.getHttpServer())
+      const res = await agent
         .post('/activities')
-        .set('Authorization', `Bearer ${accessToken}`)
         .send({ title: 'Morning Run', date: '2024-06-01', categoryId: 1 })
         .expect(201);
 
@@ -43,11 +37,7 @@ describe('Activities (e2e)', () => {
     });
 
     it('returns 400 when required fields are missing', async () => {
-      await request(app.getHttpServer())
-        .post('/activities')
-        .set('Authorization', `Bearer ${accessToken}`)
-        .send({ title: 'No date' })
-        .expect(400);
+      await agent.post('/activities').send({ title: 'No date' }).expect(400);
     });
 
     it('returns 401 when not authenticated', async () => {
@@ -60,10 +50,7 @@ describe('Activities (e2e)', () => {
 
   describe('GET /activities', () => {
     it('returns a list of activities for the current user', async () => {
-      const res = await request(app.getHttpServer())
-        .get('/activities')
-        .set('Authorization', `Bearer ${accessToken}`)
-        .expect(200);
+      const res = await agent.get('/activities').expect(200);
 
       expect(Array.isArray(res.body)).toBe(true);
     });
@@ -75,57 +62,37 @@ describe('Activities (e2e)', () => {
 
   describe('GET /activities/:id', () => {
     it('returns the activity by id', async () => {
-      const res = await request(app.getHttpServer())
-        .get(`/activities/${createdId}`)
-        .set('Authorization', `Bearer ${accessToken}`)
-        .expect(200);
+      const res = await agent.get(`/activities/${createdId}`).expect(200);
 
       const body = res.body as { id: number };
       expect(body.id).toBe(createdId);
     });
 
     it('returns 404 when activity does not exist', async () => {
-      await request(app.getHttpServer())
-        .get('/activities/99999')
-        .set('Authorization', `Bearer ${accessToken}`)
-        .expect(404);
+      await agent.get('/activities/99999').expect(404);
     });
   });
 
   describe('PATCH /activities/:id', () => {
     it('updates the activity', async () => {
-      const res = await request(app.getHttpServer())
-        .patch(`/activities/${createdId}`)
-        .set('Authorization', `Bearer ${accessToken}`)
-        .send({ title: 'Evening Run' })
-        .expect(200);
+      const res = await agent.patch(`/activities/${createdId}`).send({ title: 'Evening Run' }).expect(200);
 
       const body = res.body as { title: string };
       expect(body.title).toBe('Evening Run');
     });
 
     it('returns 404 when activity does not exist', async () => {
-      await request(app.getHttpServer())
-        .patch('/activities/99999')
-        .set('Authorization', `Bearer ${accessToken}`)
-        .send({ title: 'x' })
-        .expect(404);
+      await agent.patch('/activities/99999').send({ title: 'x' }).expect(404);
     });
   });
 
   describe('DELETE /activities/:id', () => {
     it('deletes the activity and returns 204', async () => {
-      await request(app.getHttpServer())
-        .delete(`/activities/${createdId}`)
-        .set('Authorization', `Bearer ${accessToken}`)
-        .expect(204);
+      await agent.delete(`/activities/${createdId}`).expect(204);
     });
 
     it('returns 404 when activity does not exist', async () => {
-      await request(app.getHttpServer())
-        .delete('/activities/99999')
-        .set('Authorization', `Bearer ${accessToken}`)
-        .expect(404);
+      await agent.delete('/activities/99999').expect(404);
     });
   });
 });
