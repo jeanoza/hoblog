@@ -1,0 +1,99 @@
+'use client';
+
+import { useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
+
+interface LightboxProps {
+  images: string[];
+  index: number;
+  onClose: () => void;
+  onIndexChange: (index: number) => void;
+}
+
+export function Lightbox({ images, index, onClose, onIndexChange }: LightboxProps) {
+  const prev = useCallback(() => {
+    onIndexChange((index - 1 + images.length) % images.length);
+  }, [index, images.length, onIndexChange]);
+
+  const next = useCallback(() => {
+    onIndexChange((index + 1) % images.length);
+  }, [index, images.length, onIndexChange]);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+      if (e.key === 'ArrowLeft') prev();
+      if (e.key === 'ArrowRight') next();
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [onClose, prev, next]);
+
+  if (typeof document === 'undefined') return null;
+
+  return createPortal(
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      {/* Close button */}
+      <button
+        type="button"
+        onClick={onClose}
+        className="absolute right-4 top-4 cursor-pointer rounded-full p-2 text-white/70 transition hover:bg-white/10 hover:text-white"
+        aria-label="Close"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+
+      {/* Counter */}
+      {images.length > 1 && (
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 rounded-full bg-black/40 px-3 py-1 text-xs text-white/80 backdrop-blur-sm">
+          {index + 1} / {images.length}
+        </div>
+      )}
+
+      {/* Image */}
+      <div
+        className="h-[80vh] w-[80vw] overflow-hidden rounded-lg shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={images[index]}
+          alt=""
+          className="h-full w-full object-contain"
+        />
+      </div>
+
+      {/* Prev / Next */}
+      {images.length > 1 && (
+        <>
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); prev(); }}
+            className="absolute left-4 top-1/2 -translate-y-1/2 cursor-pointer rounded-full p-3 text-white/70 transition hover:bg-white/10 hover:text-white"
+            aria-label="Previous photo"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); next(); }}
+            className="absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer rounded-full p-3 text-white/70 transition hover:bg-white/10 hover:text-white"
+            aria-label="Next photo"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </button>
+        </>
+      )}
+    </div>,
+    document.body
+  );
+}
