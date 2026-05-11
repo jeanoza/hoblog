@@ -54,7 +54,7 @@ export function Sidebar({ selectedCategoryId, onSelectCategory }: SidebarProps) 
   };
 
   return (
-    <aside className="flex h-screen w-72 flex-col border-r border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-950">
+    <aside className="flex h-screen w-68 flex-col border-r border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-950">
       <div className="flex items-start justify-between gap-2 border-b border-neutral-200 px-6 py-5 dark:border-neutral-800">
         <div className="min-w-0">
           <h1 className="text-xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100">Hoblog</h1>
@@ -89,8 +89,9 @@ export function Sidebar({ selectedCategoryId, onSelectCategory }: SidebarProps) 
                   : 'text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-800'
               }`}
             >
-              <span className="mr-2 text-base">●</span>
-              {cat.name}
+              <span className="mr-2 text-base">
+                {cat.name}
+              </span>
             </button>
             <button
               onClick={() => deleteCategory.mutate(cat.id)}
