@@ -34,15 +34,15 @@ export function ActivityCard({ activity }: ActivityCardProps) {
   };
 
   return (
-    <article className="overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm">
+    <article className="overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
       {/* Header */}
       <div className="flex items-center gap-3 px-5 py-4">
-        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-neutral-900 text-sm font-bold text-white">
+        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-neutral-900 text-sm font-bold text-white dark:bg-neutral-100 dark:text-neutral-900">
           {category?.name.charAt(0).toUpperCase() ?? '?'}
         </div>
         <div>
-          <p className="text-sm font-semibold text-neutral-900">{category?.name ?? 'Unknown'}</p>
-          <p className="text-xs text-neutral-400">{formatDate(activity.date)}</p>
+          <p className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">{category?.name ?? 'Unknown'}</p>
+          <p className="text-xs text-neutral-400 dark:text-neutral-500">{formatDate(activity.date)}</p>
         </div>
       </div>
 
@@ -65,8 +65,10 @@ export function ActivityCard({ activity }: ActivityCardProps) {
 
       {/* Body */}
       <div className="px-5 py-4">
-        <p className="font-semibold text-neutral-900">{activity.title}</p>
-        {activity.note && <p className="mt-1 text-sm leading-relaxed text-neutral-600">{activity.note}</p>}
+        <p className="font-semibold text-neutral-900 dark:text-neutral-100">{activity.title}</p>
+        {activity.note && (
+          <p className="mt-1 text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">{activity.note}</p>
+        )}
       </div>
     </article>
   );

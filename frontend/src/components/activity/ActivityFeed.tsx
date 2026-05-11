@@ -48,14 +48,14 @@ export function ActivityFeed({ categoryId }: ActivityFeedProps) {
   if (isLoading) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-neutral-900 border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-neutral-900 border-t-transparent dark:border-neutral-100 dark:border-t-transparent" />
       </div>
     );
   }
 
   if (activities.length === 0) {
     return (
-      <div className="flex h-64 flex-col items-center justify-center gap-2 text-neutral-400">
+      <div className="flex h-64 flex-col items-center justify-center gap-2 text-neutral-400 dark:text-neutral-500">
         <p className="text-4xl">📝</p>
         <p className="text-sm">No activities yet.</p>
       </div>
@@ -69,7 +69,7 @@ export function ActivityFeed({ categoryId }: ActivityFeedProps) {
       ))}
       <div ref={loaderRef} className="flex justify-center py-4">
         {isFetchingNextPage && (
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-neutral-900 border-t-transparent" />
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-neutral-900 border-t-transparent dark:border-neutral-100 dark:border-t-transparent" />
         )}
       </div>
     </div>

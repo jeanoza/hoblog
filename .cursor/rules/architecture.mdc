@@ -1,3 +1,15 @@
 ---
 alwaysApply: true
 ---
+
+Project: Hoblog
+
+Architecture style:
+- pragmatic Clean Architecture
+- vertical slice modules
+- avoid overengineering
+
+Rules:
+- no generic CRUD repositories
+- use-case oriented design
+- dependency flows inward
