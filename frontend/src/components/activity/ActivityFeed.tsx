@@ -5,6 +5,7 @@ import { useInfiniteQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import type { Activity } from '@/lib/types';
 import { ActivityCard } from './ActivityCard';
+import { Spinner } from '@/components/ui/Spinner';
 
 interface ActivityFeedProps {
   categoryId: number | null;
@@ -48,7 +49,7 @@ export function ActivityFeed({ categoryId }: ActivityFeedProps) {
   if (isLoading) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-neutral-900 border-t-transparent dark:border-neutral-100 dark:border-t-transparent" />
+        <Spinner />
       </div>
     );
   }
@@ -68,9 +69,7 @@ export function ActivityFeed({ categoryId }: ActivityFeedProps) {
         <ActivityCard key={activity.id} activity={activity} />
       ))}
       <div ref={loaderRef} className="flex justify-center py-4">
-        {isFetchingNextPage && (
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-neutral-900 border-t-transparent dark:border-neutral-100 dark:border-t-transparent" />
-        )}
+        {isFetchingNextPage && <Spinner size="sm" />}
       </div>
     </div>
   );

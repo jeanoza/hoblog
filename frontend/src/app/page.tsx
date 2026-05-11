@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth.store';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { ActivityFeed } from '@/components/activity/ActivityFeed';
+import { Spinner } from '@/components/ui/Spinner';
 
 export default function HomePage() {
   const router = useRouter();
@@ -24,7 +25,7 @@ export default function HomePage() {
   if (!initialized || isLoading || !user) {
     return (
       <div className="flex h-screen items-center justify-center bg-neutral-50 dark:bg-neutral-950">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-neutral-900 border-t-transparent dark:border-neutral-100 dark:border-t-transparent" />
+        <Spinner />
       </div>
     );
   }
@@ -42,7 +43,7 @@ export default function HomePage() {
         <button
           type="button"
           onClick={() => router.push('/activities/new')}
-          className="fixed right-8 bottom-8 flex h-14 w-14 items-center justify-center rounded-full bg-neutral-900 shadow-lg transition hover:bg-neutral-700 dark:bg-neutral-100 dark:hover:bg-neutral-200"
+          className="fixed right-8 bottom-8 flex h-14 w-14 cursor-pointer items-center justify-center rounded-full bg-neutral-900 shadow-lg transition hover:bg-neutral-700 dark:bg-neutral-100 dark:hover:bg-neutral-200"
           aria-label="New activity"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="dark:stroke-neutral-900">
