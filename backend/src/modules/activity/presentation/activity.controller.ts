@@ -21,6 +21,17 @@ import { UpdateActivityUseCase } from '../application/update-activity.usecase';
 import { DeleteActivityUseCase } from '../application/delete-activity.usecase';
 import { CreateActivityDto } from './dto/create-activity.dto';
 import { UpdateActivityDto } from './dto/update-activity.dto';
+import type { ActivitySort, ActivitySortField } from '../domain/activity.repository.interface';
+
+const ALLOWED_SORT_FIELDS = new Set<ActivitySortField>(['createdAt', 'updatedAt', 'date', 'title']);
+
+function parseSort(raw?: string): ActivitySort | undefined {
+  if (!raw) return undefined;
+  const desc = raw.startsWith('-');
+  const field = (desc ? raw.slice(1) : raw) as ActivitySortField;
+  if (!ALLOWED_SORT_FIELDS.has(field)) return undefined;
+  return { field, order: desc ? 'desc' : 'asc' };
+}
 
 @Controller('activities')
 @UseGuards(JwtAuthGuard)
@@ -47,12 +58,14 @@ export class ActivityController {
     @CurrentUser() user: AuthUser,
     @Query('skip') skip?: string,
     @Query('take') take?: string,
-    @Query('categoryId') categoryId?: string
+    @Query('categoryId') categoryId?: string,
+    @Query('sort') sort?: string
   ) {
     return this.listActivitiesUseCase.execute(user.userId, {
       skip: skip !== undefined ? parseInt(skip) : undefined,
       take: take !== undefined ? parseInt(take) : undefined,
       categoryId: categoryId !== undefined ? parseInt(categoryId) : undefined,
+      sort: parseSort(sort),
     });
   }
 

@@ -25,6 +25,7 @@ const mockPhotoRepo: jest.Mocked<IPhotoRepository> = {
 const mockStorageService = {
   getSignedUploadUrl: jest.fn(),
   getPublicUrl: jest.fn(),
+  getSignedReadUrl: jest.fn().mockResolvedValue('https://signed.url/photo.png'),
   deleteFile: jest.fn(),
 };
 
@@ -33,6 +34,7 @@ const activity = new ActivityEntity({
   title: 'Run',
   date: new Date(),
   createdAt: new Date(),
+  updatedAt: new Date(),
   userId: 1,
   categoryId: 1,
 });
@@ -84,7 +86,7 @@ describe('ListPhotosUseCase', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useCase = new ListPhotosUseCase(mockActivityRepo, mockPhotoRepo);
+    useCase = new ListPhotosUseCase(mockActivityRepo, mockPhotoRepo, mockStorageService as any);
   });
 
   it('returns photos for owned activity', async () => {

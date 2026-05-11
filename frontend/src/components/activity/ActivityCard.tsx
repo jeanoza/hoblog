@@ -52,7 +52,7 @@ export function ActivityCard({ activity }: ActivityCardProps) {
           {photos.slice(0, 4).map((photo, i) => (
             <div key={photo.id} className={`relative ${photos.length === 1 ? 'aspect-[4/3]' : 'aspect-square'}`}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={photo.url} alt="" className="h-full w-full object-cover" />
+              <img src={photo.signedUrl} alt="" className="h-full w-full object-cover" />
               {i === 3 && photos.length > 4 && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-lg font-bold text-white">
                   +{photos.length - 4}

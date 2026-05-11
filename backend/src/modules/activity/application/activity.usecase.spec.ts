@@ -22,6 +22,7 @@ const makeActivity = (overrides: Partial<ConstructorParameters<typeof ActivityEn
     note: '5km',
     date: new Date('2024-06-01'),
     createdAt: new Date('2024-06-01'),
+    updatedAt: new Date('2024-06-01'),
     userId: 1,
     categoryId: 1,
     ...overrides,

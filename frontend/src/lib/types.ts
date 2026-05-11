@@ -10,13 +10,14 @@ export interface Activity {
   note: string | null;
   date: string;
   createdAt: string;
+  updatedAt: string;
   userId: number;
   categoryId: number;
 }
 
 export interface Photo {
   id: number;
-  url: string;
+  signedUrl: string;
   order: number;
   activityId: number;
 }

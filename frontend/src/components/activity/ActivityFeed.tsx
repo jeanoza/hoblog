@@ -19,7 +19,7 @@ export function ActivityFeed({ categoryId }: ActivityFeedProps) {
     queryKey: ['activities', categoryId],
     queryFn: async ({ pageParam = 0 }) => {
       const { data } = await api.get<Activity[]>('/activities', {
-        params: { skip: pageParam, take: PAGE_SIZE, categoryId: categoryId ?? undefined },
+        params: { skip: pageParam, take: PAGE_SIZE, categoryId: categoryId ?? undefined, sort: '-updatedAt' },
       });
       return data;
     },

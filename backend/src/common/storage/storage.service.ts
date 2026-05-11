@@ -31,6 +31,18 @@ export class StorageService {
     return `https://storage.googleapis.com/${this.bucketName}/${destination}`;
   }
 
+  async getSignedReadUrl(destination: string, expiresInMs = 60 * 60 * 1000): Promise<string> {
+    const [url] = await this.storage
+      .bucket(this.bucketName)
+      .file(destination)
+      .getSignedUrl({
+        version: 'v4',
+        action: 'read',
+        expires: Date.now() + expiresInMs,
+      });
+    return url;
+  }
+
   async deleteFile(destination: string): Promise<void> {
     await this.storage.bucket(this.bucketName).file(destination).delete({ ignoreNotFound: true });
   }

@@ -28,15 +28,17 @@ model Category {
 }
 
 model Activity {
-  id         Int      @id @default(autoincrement())
+  id         Int       @id @default(autoincrement())
   title      String
   note       String?
   date       DateTime
-  createdAt  DateTime @default(now())
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  deletedAt  DateTime?
   userId     Int
   categoryId Int
-  user       User     @relation(fields: [userId], references: [id])
-  category   Category @relation(fields: [categoryId], references: [id])
+  user       User      @relation(fields: [userId], references: [id])
+  category   Category  @relation(fields: [categoryId], references: [id])
   photos     Photo[]
 }
 

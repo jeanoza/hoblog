@@ -33,10 +33,22 @@ export default function HomePage() {
     <div className="flex h-screen overflow-hidden bg-neutral-50 dark:bg-neutral-950">
       <Sidebar selectedCategoryId={selectedCategoryId} onSelectCategory={setSelectedCategoryId} />
 
-      <main className="flex-1 overflow-y-auto bg-neutral-50 dark:bg-neutral-950">
+      <main className="relative flex-1 overflow-y-auto bg-neutral-50 dark:bg-neutral-950">
         <div className="mx-auto max-w-xl px-4 py-8">
           <ActivityFeed categoryId={selectedCategoryId} />
         </div>
+
+        {/* FAB */}
+        <button
+          type="button"
+          onClick={() => router.push('/activities/new')}
+          className="fixed right-8 bottom-8 flex h-14 w-14 items-center justify-center rounded-full bg-neutral-900 shadow-lg transition hover:bg-neutral-700 dark:bg-neutral-100 dark:hover:bg-neutral-200"
+          aria-label="New activity"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="dark:stroke-neutral-900">
+            <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+        </button>
       </main>
     </div>
   );

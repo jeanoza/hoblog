@@ -4,6 +4,8 @@ export class ActivityEntity {
   readonly note: string | null;
   readonly date: Date;
   readonly createdAt: Date;
+  readonly updatedAt: Date;
+  readonly deletedAt: Date | null;
   readonly userId: number;
   readonly categoryId: number;
 
@@ -13,6 +15,8 @@ export class ActivityEntity {
     note?: string | null;
     date: Date;
     createdAt: Date;
+    updatedAt: Date;
+    deletedAt?: Date | null;
     userId: number;
     categoryId: number;
   }) {
@@ -21,7 +25,13 @@ export class ActivityEntity {
     this.note = data.note ?? null;
     this.date = data.date;
     this.createdAt = data.createdAt;
+    this.updatedAt = data.updatedAt;
+    this.deletedAt = data.deletedAt ?? null;
     this.userId = data.userId;
     this.categoryId = data.categoryId;
+  }
+
+  get isDeleted(): boolean {
+    return this.deletedAt !== null;
   }
 }
