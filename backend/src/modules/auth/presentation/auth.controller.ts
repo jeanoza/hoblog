@@ -57,7 +57,7 @@ export class AuthController {
     @Body() dto: RefreshDto,
     @Res({ passthrough: true }) res: Response
   ) {
-    const refreshToken = dto.refreshToken ?? req.cookies?.[REFRESH_TOKEN_COOKIE];
+    const refreshToken = dto?.refreshToken ?? (req.cookies?.[REFRESH_TOKEN_COOKIE] as string);
     if (!refreshToken) {
       throw new UnauthorizedException('Invalid refresh token');
     }

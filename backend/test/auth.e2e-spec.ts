@@ -19,6 +19,72 @@ describe('Auth (e2e)', () => {
     await app.close();
   });
 
+  describe('POST /auth/register', () => {
+    it('creates a new user and sets auth cookies', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/auth/register')
+        .send({ email: 'newuser@hoblog.com', name: 'New User', password: 'password123' })
+        .expect(201);
+
+      expect(res.body).toEqual({});
+      const raw = res.headers['set-cookie'];
+      const cookies = Array.isArray(raw) ? raw : raw ? [raw] : [];
+      expect(cookies.some((c: string) => c.startsWith(`${ACCESS_TOKEN_COOKIE}=`))).toBe(true);
+      expect(cookies.some((c: string) => c.startsWith(`${REFRESH_TOKEN_COOKIE}=`))).toBe(true);
+    });
+
+    it('returns 409 when email is already registered', async () => {
+      await request(app.getHttpServer())
+        .post('/auth/register')
+        .send({ email: 'admin@hoblog.com', name: 'Dup', password: 'password123' })
+        .expect(409);
+    });
+
+    it('returns 400 when email format is invalid', async () => {
+      await request(app.getHttpServer())
+        .post('/auth/register')
+        .send({ email: 'not-an-email', name: 'Test', password: 'password123' })
+        .expect(400);
+    });
+
+    it('returns 400 when required fields are missing', async () => {
+      await request(app.getHttpServer())
+        .post('/auth/register')
+        .send({ email: 'missing@hoblog.com' })
+        .expect(400);
+    });
+  });
+
+  describe('POST /auth/refresh', () => {
+    it('issues new auth cookies using the refresh token cookie', async () => {
+      const agent = request.agent(app.getHttpServer());
+      await agent
+        .post('/auth/login')
+        .send({ email: 'admin@hoblog.com', password: 'password123' })
+        .expect(200);
+
+      const res = await agent.post('/auth/refresh').send({}).expect(200);
+
+      expect(res.body).toEqual({});
+      const raw = res.headers['set-cookie'];
+      const cookies = Array.isArray(raw) ? raw : raw ? [raw] : [];
+      expect(cookies.some((c: string) => c.startsWith(`${ACCESS_TOKEN_COOKIE}=`))).toBe(true);
+      expect(cookies.some((c: string) => c.startsWith(`${REFRESH_TOKEN_COOKIE}=`))).toBe(true);
+    });
+
+    it('returns 401 when no refresh token is provided', async () => {
+      await request(app.getHttpServer()).post('/auth/refresh').send({}).expect(401);
+    });
+
+    it('returns 401 when refresh token is invalid', async () => {
+      await request(app.getHttpServer())
+        .post('/auth/refresh')
+        .send({})
+        .set('Cookie', `${REFRESH_TOKEN_COOKIE}=invalid.token`)
+        .expect(401);
+    });
+  });
+
   describe('POST /auth/login', () => {
     it('sets httpOnly auth cookies when credentials are valid', async () => {
       const res = await request(app.getHttpServer())
@@ -30,9 +96,9 @@ describe('Auth (e2e)', () => {
       const raw = res.headers['set-cookie'];
       const cookies = Array.isArray(raw) ? raw : raw ? [raw] : [];
       expect(cookies.length).toBeGreaterThan(0);
-      expect(cookies.some((c) => c.startsWith(`${ACCESS_TOKEN_COOKIE}=`))).toBe(true);
-      expect(cookies.some((c) => c.startsWith(`${REFRESH_TOKEN_COOKIE}=`))).toBe(true);
-      expect(cookies.every((c) => c.toLowerCase().includes('httponly'))).toBe(true);
+      expect(cookies.some((c: string) => c.startsWith(`${ACCESS_TOKEN_COOKIE}=`))).toBe(true);
+      expect(cookies.some((c: string) => c.startsWith(`${REFRESH_TOKEN_COOKIE}=`))).toBe(true);
+      expect(cookies.every((c: string) => c.toLowerCase().includes('httponly'))).toBe(true);
     });
 
     it('returns 401 when password is wrong', async () => {
@@ -67,7 +133,10 @@ describe('Auth (e2e)', () => {
   describe('POST /auth/logout', () => {
     it('returns 204 when logged out with valid session cookie', async () => {
       const agent = request.agent(app.getHttpServer());
-      await agent.post('/auth/login').send({ email: 'admin@hoblog.com', password: 'password123' }).expect(200);
+      await agent
+        .post('/auth/login')
+        .send({ email: 'admin@hoblog.com', password: 'password123' })
+        .expect(200);
       await agent.post('/auth/logout').expect(204);
     });
 
@@ -84,7 +153,10 @@ describe('Auth (e2e)', () => {
 
     it('invalidates the refresh token after logout', async () => {
       const agent = request.agent(app.getHttpServer());
-      await agent.post('/auth/login').send({ email: 'admin@hoblog.com', password: 'password123' }).expect(200);
+      await agent
+        .post('/auth/login')
+        .send({ email: 'admin@hoblog.com', password: 'password123' })
+        .expect(200);
       await agent.post('/auth/logout').expect(204);
       await agent.post('/auth/refresh').send({}).expect(401);
     });
