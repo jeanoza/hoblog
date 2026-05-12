@@ -51,6 +51,18 @@ describe('CreateActivityUseCase', () => {
   });
 });
 
+describe('ActivityEntity', () => {
+  it('isDeleted returns false when deletedAt is null', () => {
+    const activity = makeActivity({ deletedAt: null });
+    expect(activity.isDeleted).toBe(false);
+  });
+
+  it('isDeleted returns true when deletedAt is set', () => {
+    const activity = makeActivity({ deletedAt: new Date() });
+    expect(activity.isDeleted).toBe(true);
+  });
+});
+
 describe('ListActivitiesUseCase', () => {
   const useCase = new ListActivitiesUseCase(mockRepo);
 

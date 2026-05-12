@@ -9,3 +9,11 @@ Backend (NestJS):
 - Prisma only in infrastructure
 - avoid global services
 - keep controllers thin
+
+Unit tests:
+
+- one spec file per module: `{module}.usecase.spec.ts` (e.g. `category.usecase.spec.ts`)
+- all use cases in the module share a single `jest.Mocked<IRepository>` mock
+- use `beforeEach(() => jest.clearAllMocks())` at the top level or per describe block
+- instantiate use cases directly with `new UseCase(mockRepo)` — no NestJS testing module
+- test descriptions in English
