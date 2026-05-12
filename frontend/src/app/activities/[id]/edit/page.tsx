@@ -1,11 +1,15 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import type { Activity, Photo } from '@/lib/types';
-import { DatePicker } from '@/components/ui/DatePicker';
+import { FormInput } from '@/components/ui/FormInput';
+import { SelectInput } from '@/components/ui/SelectInput';
+import { DateInput } from '@/components/ui/DateInput';
+import { FormTextarea } from '@/components/ui/FormTextarea';
+import { PhotoPicker, type PhotoItem } from '@/components/ui/PhotoPicker';
 import { useCategories } from '@/hooks/useCategories';
 import { Spinner } from '@/components/ui/Spinner';
 
@@ -42,7 +46,6 @@ interface EditFormProps {
 function EditForm({ activityId, initial, initialPhotos }: EditFormProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [title, setTitle] = useState(initial.title);
   const [note, setNote] = useState(initial.note ?? '');
@@ -103,11 +106,6 @@ function EditForm({ activityId, initial, initialPhotos }: EditFormProps) {
     });
   };
 
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    handleFiles(e.dataTransfer.files);
-  };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -136,120 +134,49 @@ function EditForm({ activityId, initial, initialPhotos }: EditFormProps) {
 
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Title */}
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
-              Title <span className="text-red-400">*</span>
-            </label>
-            <input
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="What did you do?"
-              className="w-full rounded-xl border border-neutral-200 bg-white px-4 py-3 text-sm text-neutral-900 outline-none transition focus:border-neutral-900 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:focus:border-neutral-400"
-            />
-          </div>
+          <FormInput
+            label="Title"
+            value={title}
+            onChange={setTitle}
+            placeholder="What did you do?"
+            required
+          />
 
           {/* Category + Date */}
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
-                Category <span className="text-red-400">*</span>
-              </label>
-              <select
-                value={categoryId}
-                onChange={(e) => setCategoryId(e.target.value ? Number(e.target.value) : '')}
-                className="w-full rounded-xl border border-neutral-200 bg-white px-4 py-3 text-sm text-neutral-900 outline-none transition focus:border-neutral-900 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:focus:border-neutral-400"
-              >
-                <option value="">Select…</option>
-                {categories.map((c) => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
-                Date <span className="text-red-400">*</span>
-              </label>
-              <DatePicker value={date} onChange={setDate} />
-            </div>
-          </div>
-
-          {/* Note */}
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
-              Note
-            </label>
-            <textarea
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              placeholder="How was it?"
-              rows={4}
-              className="w-full resize-none rounded-xl border border-neutral-200 bg-white px-4 py-3 text-sm text-neutral-900 outline-none transition focus:border-neutral-900 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:focus:border-neutral-400"
+            <SelectInput
+              label="Category"
+              value={categoryId}
+              onChange={(v) => setCategoryId(v ? Number(v) : '')}
+              options={categories.map((c) => ({ value: c.id, label: c.name }))}
+              required
             />
+            <DateInput label="Date" value={date} onChange={setDate} required />
           </div>
 
-          {/* Photos */}
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
-              Photos
-            </label>
+          <FormTextarea
+            label="Note"
+            value={note}
+            onChange={setNote}
+            placeholder="How was it?"
+          />
 
-            {(existingPhotos.length > 0 || newPhotos.length > 0) && (
-              <div className="mb-3 grid grid-cols-4 gap-2">
-                {existingPhotos.map((photo) => (
-                  <div key={photo.id} className="group relative aspect-square overflow-hidden rounded-xl">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={photo.signedUrl} alt="" className="h-full w-full object-cover" />
-                    <button
-                      type="button"
-                      onClick={() => removeExistingPhoto(photo.id)}
-                      className="absolute inset-0 flex cursor-pointer items-center justify-center bg-black/0 opacity-0 transition group-hover:bg-black/40 group-hover:opacity-100"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-                      </svg>
-                    </button>
-                  </div>
-                ))}
-
-                {newPhotos.map((p, i) => (
-                  <div key={`new-${i}`} className="group relative aspect-square overflow-hidden rounded-xl ring-2 ring-neutral-400 ring-offset-1 dark:ring-neutral-500">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={p.previewUrl} alt="" className="h-full w-full object-cover" />
-                    <button
-                      type="button"
-                      onClick={() => removeNewPhoto(i)}
-                      className="absolute inset-0 flex cursor-pointer items-center justify-center bg-black/0 opacity-0 transition group-hover:bg-black/40 group-hover:opacity-100"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-                      </svg>
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            <div
-              onDrop={handleDrop}
-              onDragOver={(e) => e.preventDefault()}
-              onClick={() => fileInputRef.current?.click()}
-              className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-neutral-200 px-4 py-10 text-neutral-400 transition hover:border-neutral-400 hover:text-neutral-500 dark:border-neutral-700 dark:text-neutral-500 dark:hover:border-neutral-500"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" />
-                <polyline points="21 15 16 10 5 21" />
-              </svg>
-              <span className="text-sm">Click or drag photos here</span>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                multiple
-                className="hidden"
-                onChange={(e) => handleFiles(e.target.files)}
-              />
-            </div>
-          </div>
+          <PhotoPicker
+            photos={[
+              ...existingPhotos.map((photo): PhotoItem => ({
+                key: `existing-${photo.id}`,
+                src: photo.signedUrl,
+                onRemove: () => removeExistingPhoto(photo.id),
+              })),
+              ...newPhotos.map((p, i): PhotoItem => ({
+                key: `new-${i}`,
+                src: p.previewUrl,
+                onRemove: () => removeNewPhoto(i),
+                isNew: true,
+              })),
+            ]}
+            onAdd={handleFiles}
+          />
 
           {error && <p className="text-sm text-red-500 dark:text-red-400">{error}</p>}
 
