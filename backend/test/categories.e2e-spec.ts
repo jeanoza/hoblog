@@ -1,11 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
+import { Server } from 'http';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { bootstrapE2eApp } from './bootstrap-e2e-app';
 
 describe('Categories (e2e)', () => {
   let app: INestApplication;
+  let server: Server;
   let agent: ReturnType<typeof request.agent>;
 
   beforeAll(async () => {
@@ -14,7 +16,8 @@ describe('Categories (e2e)', () => {
     }).compile();
 
     app = await bootstrapE2eApp(moduleFixture);
-    agent = request.agent(app.getHttpServer());
+    server = app.getHttpServer() as Server;
+    agent = request.agent(server);
     await agent
       .post('/auth/login')
       .send({ email: 'admin@hoblog.com', password: 'password123' })
@@ -39,13 +42,16 @@ describe('Categories (e2e)', () => {
     });
 
     it('returns 401 when not authenticated', async () => {
-      await request(app.getHttpServer()).get('/categories').expect(401);
+      await request(server).get('/categories').expect(401);
     });
   });
 
   describe('POST /categories', () => {
     it('creates a new category', async () => {
-      const res = await agent.post('/categories').send({ name: 'E2E Test Category' }).expect(201);
+      const res = await agent
+        .post('/categories')
+        .send({ name: 'E2E Test Category' })
+        .expect(201);
 
       const body = res.body as { id: number; name: string; userId: number };
       expect(body.name).toBe('E2E Test Category');
@@ -53,7 +59,10 @@ describe('Categories (e2e)', () => {
     });
 
     it('returns 409 when category name already exists for the user', async () => {
-      await agent.post('/categories').send({ name: 'E2E Test Category' }).expect(409);
+      await agent
+        .post('/categories')
+        .send({ name: 'E2E Test Category' })
+        .expect(409);
     });
 
     it('returns 400 when name is empty', async () => {
@@ -61,13 +70,19 @@ describe('Categories (e2e)', () => {
     });
 
     it('returns 401 when not authenticated', async () => {
-      await request(app.getHttpServer()).post('/categories').send({ name: 'Test' }).expect(401);
+      await request(server)
+        .post('/categories')
+        .send({ name: 'Test' })
+        .expect(401);
     });
   });
 
   describe('PATCH /categories/:id', () => {
     it('renames an owned category', async () => {
-      const createRes = await agent.post('/categories').send({ name: 'To Rename' }).expect(201);
+      const createRes = await agent
+        .post('/categories')
+        .send({ name: 'To Rename' })
+        .expect(201);
 
       const created = createRes.body as { id: number };
 
@@ -81,26 +96,44 @@ describe('Categories (e2e)', () => {
     });
 
     it('returns 409 when new name already exists', async () => {
-      const first = await agent.post('/categories').send({ name: 'Conflict Source' }).expect(201);
+      const first = await agent
+        .post('/categories')
+        .send({ name: 'Conflict Source' })
+        .expect(201);
 
-      await agent.post('/categories').send({ name: 'Conflict Target' }).expect(201);
+      await agent
+        .post('/categories')
+        .send({ name: 'Conflict Target' })
+        .expect(201);
 
       const { id } = first.body as { id: number };
-      await agent.patch(`/categories/${id}`).send({ name: 'Conflict Target' }).expect(409);
+      await agent
+        .patch(`/categories/${id}`)
+        .send({ name: 'Conflict Target' })
+        .expect(409);
     });
 
     it('returns 404 when category does not exist', async () => {
-      await agent.patch('/categories/999999').send({ name: 'Ghost' }).expect(404);
+      await agent
+        .patch('/categories/999999')
+        .send({ name: 'Ghost' })
+        .expect(404);
     });
 
     it('returns 401 when not authenticated', async () => {
-      await request(app.getHttpServer()).patch('/categories/1').send({ name: 'Test' }).expect(401);
+      await request(server)
+        .patch('/categories/1')
+        .send({ name: 'Test' })
+        .expect(401);
     });
   });
 
   describe('DELETE /categories/:id', () => {
     it('deletes an owned category', async () => {
-      const createRes = await agent.post('/categories').send({ name: 'To Delete' }).expect(201);
+      const createRes = await agent
+        .post('/categories')
+        .send({ name: 'To Delete' })
+        .expect(201);
 
       const created = createRes.body as { id: number };
 
@@ -112,7 +145,7 @@ describe('Categories (e2e)', () => {
     });
 
     it('returns 401 when not authenticated', async () => {
-      await request(app.getHttpServer()).delete('/categories/1').expect(401);
+      await request(server).delete('/categories/1').expect(401);
     });
   });
 });

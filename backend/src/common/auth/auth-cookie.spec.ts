@@ -6,6 +6,7 @@ import {
   ACCESS_TOKEN_COOKIE,
   REFRESH_TOKEN_COOKIE,
 } from './auth-cookie';
+import { Response } from 'express';
 
 const mockRes = {
   cookie: jest.fn(),
@@ -47,7 +48,7 @@ describe('refreshCookieOptions', () => {
 
 describe('setAuthCookies', () => {
   it('sets access and refresh cookies with correct names', () => {
-    setAuthCookies(mockRes as any, {
+    setAuthCookies(mockRes as unknown as Response, {
       accessToken: 'acc.token',
       refreshToken: 'ref.token',
     });
@@ -68,10 +69,14 @@ describe('setAuthCookies', () => {
 
 describe('clearAuthCookies', () => {
   it('clears access and refresh cookies', () => {
-    clearAuthCookies(mockRes as any);
+    clearAuthCookies(mockRes as unknown as Response);
 
     expect(mockRes.clearCookie).toHaveBeenCalledTimes(2);
-    expect(mockRes.clearCookie).toHaveBeenCalledWith(ACCESS_TOKEN_COOKIE, { path: '/' });
-    expect(mockRes.clearCookie).toHaveBeenCalledWith(REFRESH_TOKEN_COOKIE, { path: '/' });
+    expect(mockRes.clearCookie).toHaveBeenCalledWith(ACCESS_TOKEN_COOKIE, {
+      path: '/',
+    });
+    expect(mockRes.clearCookie).toHaveBeenCalledWith(REFRESH_TOKEN_COOKIE, {
+      path: '/',
+    });
   });
 });

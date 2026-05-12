@@ -18,7 +18,9 @@ export class RegisterUseCase {
     private readonly loginUseCase: LoginUseCase
   ) {}
 
-  async execute(input: RegisterInput): Promise<{ accessToken: string; refreshToken: string }> {
+  async execute(
+    input: RegisterInput
+  ): Promise<{ accessToken: string; refreshToken: string }> {
     const existing = await this.userRepository.findByEmail(input.email);
     if (existing) {
       throw new ConflictException('Email already in use');

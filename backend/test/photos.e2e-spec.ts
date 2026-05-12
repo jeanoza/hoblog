@@ -1,21 +1,27 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
+import { Server } from 'http';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { bootstrapE2eApp } from './bootstrap-e2e-app';
 import { StorageService } from '../src/common/storage/storage.service';
 
 const mockStorageService = {
-  getSignedUploadUrl: jest.fn().mockResolvedValue('https://mock-signed-upload.url'),
+  getSignedUploadUrl: jest
+    .fn()
+    .mockResolvedValue('https://mock-signed-upload.url'),
   getPublicUrl: jest
     .fn()
-    .mockReturnValue('https://storage.googleapis.com/bucket/photos/1/1/mock.jpg'),
+    .mockReturnValue(
+      'https://storage.googleapis.com/bucket/photos/1/1/mock.jpg'
+    ),
   getSignedReadUrl: jest.fn().mockResolvedValue('https://mock-signed-read.url'),
   deleteFile: jest.fn().mockResolvedValue(undefined),
 };
 
 describe('Photos (e2e)', () => {
   let app: INestApplication;
+  let server: Server;
   let agent: ReturnType<typeof request.agent>;
   let activityId: number;
   let photoId: number;
@@ -29,7 +35,8 @@ describe('Photos (e2e)', () => {
       .compile();
 
     app = await bootstrapE2eApp(moduleFixture);
-    agent = request.agent(app.getHttpServer());
+    server = app.getHttpServer() as Server;
+    agent = request.agent(server);
     await agent
       .post('/auth/login')
       .send({ email: 'admin@hoblog.com', password: 'password123' })
@@ -53,7 +60,11 @@ describe('Photos (e2e)', () => {
         .send({ contentType: 'image/jpeg' })
         .expect(201);
 
-      const body = res.body as { uploadUrl: string; destination: string; publicUrl: string };
+      const body = res.body as {
+        uploadUrl: string;
+        destination: string;
+        publicUrl: string;
+      };
       expect(body.uploadUrl).toBe('https://mock-signed-upload.url');
       expect(body.destination).toBeDefined();
       expect(body.publicUrl).toBeDefined();
@@ -74,7 +85,7 @@ describe('Photos (e2e)', () => {
     });
 
     it('returns 401 when not authenticated', async () => {
-      await request(app.getHttpServer())
+      await request(server)
         .post(`/activities/${activityId}/photos/upload-url`)
         .send({ contentType: 'image/jpeg' })
         .expect(401);
@@ -85,7 +96,10 @@ describe('Photos (e2e)', () => {
     it('creates a photo record and returns it', async () => {
       const res = await agent
         .post(`/activities/${activityId}/photos`)
-        .send({ url: 'https://storage.googleapis.com/bucket/photos/1/1/mock.jpg', order: 0 })
+        .send({
+          url: 'https://storage.googleapis.com/bucket/photos/1/1/mock.jpg',
+          order: 0,
+        })
         .expect(201);
 
       const body = res.body as { id: number; url: string; order: number };
@@ -95,7 +109,10 @@ describe('Photos (e2e)', () => {
     });
 
     it('returns 400 when url is missing', async () => {
-      await agent.post(`/activities/${activityId}/photos`).send({ order: 0 }).expect(400);
+      await agent
+        .post(`/activities/${activityId}/photos`)
+        .send({ order: 0 })
+        .expect(400);
     });
 
     it('returns 404 when activity does not exist', async () => {
@@ -106,7 +123,7 @@ describe('Photos (e2e)', () => {
     });
 
     it('returns 401 when not authenticated', async () => {
-      await request(app.getHttpServer())
+      await request(server)
         .post(`/activities/${activityId}/photos`)
         .send({ url: 'https://storage.googleapis.com/bucket/photo.jpg' })
         .expect(401);
@@ -115,7 +132,9 @@ describe('Photos (e2e)', () => {
 
   describe('GET /activities/:activityId/photos', () => {
     it('returns photos for the activity', async () => {
-      const res = await agent.get(`/activities/${activityId}/photos`).expect(200);
+      const res = await agent
+        .get(`/activities/${activityId}/photos`)
+        .expect(200);
 
       expect(Array.isArray(res.body)).toBe(true);
       expect((res.body as unknown[]).length).toBeGreaterThan(0);
@@ -126,13 +145,15 @@ describe('Photos (e2e)', () => {
     });
 
     it('returns 401 when not authenticated', async () => {
-      await request(app.getHttpServer()).get(`/activities/${activityId}/photos`).expect(401);
+      await request(server).get(`/activities/${activityId}/photos`).expect(401);
     });
   });
 
   describe('DELETE /activities/:activityId/photos/:photoId', () => {
     it('deletes the photo and returns 204', async () => {
-      await agent.delete(`/activities/${activityId}/photos/${photoId}`).expect(204);
+      await agent
+        .delete(`/activities/${activityId}/photos/${photoId}`)
+        .expect(204);
       expect(mockStorageService.deleteFile).toHaveBeenCalled();
     });
 
@@ -141,7 +162,7 @@ describe('Photos (e2e)', () => {
     });
 
     it('returns 401 when not authenticated', async () => {
-      await request(app.getHttpServer())
+      await request(server)
         .delete(`/activities/${activityId}/photos/${photoId}`)
         .expect(401);
     });

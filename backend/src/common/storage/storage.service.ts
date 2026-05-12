@@ -14,7 +14,10 @@ export class StorageService {
     this.bucketName = process.env.GCS_BUCKET_NAME ?? '';
   }
 
-  async getSignedUploadUrl(destination: string, contentType: string): Promise<string> {
+  async getSignedUploadUrl(
+    destination: string,
+    contentType: string
+  ): Promise<string> {
     const [url] = await this.storage
       .bucket(this.bucketName)
       .file(destination)
@@ -31,7 +34,10 @@ export class StorageService {
     return `https://storage.googleapis.com/${this.bucketName}/${destination}`;
   }
 
-  async getSignedReadUrl(destination: string, expiresInMs = 60 * 60 * 1000): Promise<string> {
+  async getSignedReadUrl(
+    destination: string,
+    expiresInMs = 60 * 60 * 1000
+  ): Promise<string> {
     const [url] = await this.storage
       .bucket(this.bucketName)
       .file(destination)
@@ -44,6 +50,9 @@ export class StorageService {
   }
 
   async deleteFile(destination: string): Promise<void> {
-    await this.storage.bucket(this.bucketName).file(destination).delete({ ignoreNotFound: true });
+    await this.storage
+      .bucket(this.bucketName)
+      .file(destination)
+      .delete({ ignoreNotFound: true });
   }
 }

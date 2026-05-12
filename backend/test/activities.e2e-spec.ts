@@ -1,11 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
+import { Server } from 'http';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { bootstrapE2eApp } from './bootstrap-e2e-app';
 
 describe('Activities (e2e)', () => {
   let app: INestApplication;
+  let server: Server;
   let agent: ReturnType<typeof request.agent>;
   let createdId: number;
 
@@ -15,8 +17,12 @@ describe('Activities (e2e)', () => {
     }).compile();
 
     app = await bootstrapE2eApp(moduleFixture);
-    agent = request.agent(app.getHttpServer());
-    await agent.post('/auth/login').send({ email: 'admin@hoblog.com', password: 'password123' }).expect(200);
+    server = app.getHttpServer() as Server;
+    agent = request.agent(server);
+    await agent
+      .post('/auth/login')
+      .send({ email: 'admin@hoblog.com', password: 'password123' })
+      .expect(200);
   });
 
   afterAll(async () => {
@@ -41,7 +47,7 @@ describe('Activities (e2e)', () => {
     });
 
     it('returns 401 when not authenticated', async () => {
-      await request(app.getHttpServer())
+      await request(server)
         .post('/activities')
         .send({ title: 'Morning Run', date: '2024-06-01', categoryId: 1 })
         .expect(401);
@@ -56,7 +62,7 @@ describe('Activities (e2e)', () => {
     });
 
     it('returns 401 when not authenticated', async () => {
-      await request(app.getHttpServer()).get('/activities').expect(401);
+      await request(server).get('/activities').expect(401);
     });
   });
 
@@ -75,7 +81,10 @@ describe('Activities (e2e)', () => {
 
   describe('PATCH /activities/:id', () => {
     it('updates the activity', async () => {
-      const res = await agent.patch(`/activities/${createdId}`).send({ title: 'Evening Run' }).expect(200);
+      const res = await agent
+        .patch(`/activities/${createdId}`)
+        .send({ title: 'Evening Run' })
+        .expect(200);
 
       const body = res.body as { title: string };
       expect(body.title).toBe('Evening Run');

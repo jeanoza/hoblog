@@ -1,4 +1,9 @@
-import { Injectable, Inject, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { ACTIVITY_REPOSITORY } from '../../activity/domain/activity.repository.interface';
 import type { IActivityRepository } from '../../activity/domain/activity.repository.interface';
 import { PHOTO_REPOSITORY } from '../domain/photo.repository.interface';
@@ -27,7 +32,10 @@ export class ListPhotosUseCase {
     private readonly storageService: StorageService
   ) {}
 
-  async execute(userId: number, activityId: number): Promise<PhotoWithSignedUrl[]> {
+  async execute(
+    userId: number,
+    activityId: number
+  ): Promise<PhotoWithSignedUrl[]> {
     const activity = await this.activityRepository.findById(activityId);
     if (!activity) {
       throw new NotFoundException('Activity not found');

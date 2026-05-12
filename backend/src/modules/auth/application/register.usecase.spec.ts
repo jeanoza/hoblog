@@ -49,7 +49,9 @@ describe('RegisterUseCase', () => {
       accessToken: 'mock.access.token',
       refreshToken: 'mock.refresh.token',
     });
-    expect(mockUserRepository.findByEmail).toHaveBeenCalledWith('test@example.com');
+    expect(mockUserRepository.findByEmail).toHaveBeenCalledWith(
+      'test@example.com'
+    );
     expect(mockUserRepository.create).toHaveBeenCalledWith(
       expect.objectContaining({
         email: 'test@example.com',

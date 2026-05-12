@@ -18,7 +18,12 @@ export class ActivityRepository implements IActivityRepository {
 
   async findAllByUserId(
     userId: number,
-    options?: { skip?: number; take?: number; categoryId?: number; sort?: ActivitySort }
+    options?: {
+      skip?: number;
+      take?: number;
+      categoryId?: number;
+      sort?: ActivitySort;
+    }
   ): Promise<ActivityEntity[]> {
     const { field = 'updatedAt', order = 'desc' } = options?.sort ?? {};
     const activities = await this.prisma.activity.findMany({

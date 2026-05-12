@@ -1,4 +1,9 @@
-import { Injectable, Inject, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { ACTIVITY_REPOSITORY } from '../domain/activity.repository.interface';
 import type { IActivityRepository } from '../domain/activity.repository.interface';
 import { ActivityEntity } from '../domain/activity.entity';
@@ -17,7 +22,11 @@ export class UpdateActivityUseCase {
     private readonly activityRepository: IActivityRepository
   ) {}
 
-  async execute(id: number, userId: number, input: UpdateActivityInput): Promise<ActivityEntity> {
+  async execute(
+    id: number,
+    userId: number,
+    input: UpdateActivityInput
+  ): Promise<ActivityEntity> {
     const activity = await this.activityRepository.findById(id);
     if (!activity) {
       throw new NotFoundException('Activity not found');

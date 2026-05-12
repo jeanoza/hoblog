@@ -18,7 +18,10 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshDto } from './dto/refresh.dto';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
-import { CurrentUser, type AuthUser } from '../../../common/decorators/current-user.decorator';
+import {
+  CurrentUser,
+  type AuthUser,
+} from '../../../common/decorators/current-user.decorator';
 import {
   REFRESH_TOKEN_COOKIE,
   setAuthCookies,
@@ -36,7 +39,10 @@ export class AuthController {
 
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
-  async register(@Body() dto: RegisterDto, @Res({ passthrough: true }) res: Response) {
+  async register(
+    @Body() dto: RegisterDto,
+    @Res({ passthrough: true }) res: Response
+  ) {
     const tokens = await this.registerUseCase.execute(dto);
     setAuthCookies(res, tokens);
     return {};
@@ -44,7 +50,10 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  async login(@Body() dto: LoginDto, @Res({ passthrough: true }) res: Response) {
+  async login(
+    @Body() dto: LoginDto,
+    @Res({ passthrough: true }) res: Response
+  ) {
     const tokens = await this.loginUseCase.execute(dto);
     setAuthCookies(res, tokens);
     return {};
@@ -57,7 +66,8 @@ export class AuthController {
     @Body() dto: RefreshDto,
     @Res({ passthrough: true }) res: Response
   ) {
-    const refreshToken = dto?.refreshToken ?? (req.cookies?.[REFRESH_TOKEN_COOKIE] as string);
+    const refreshToken =
+      dto?.refreshToken ?? (req.cookies?.[REFRESH_TOKEN_COOKIE] as string);
     if (!refreshToken) {
       throw new UnauthorizedException('Invalid refresh token');
     }
@@ -69,7 +79,10 @@ export class AuthController {
   @Post('logout')
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
-  async logout(@CurrentUser() user: AuthUser, @Res({ passthrough: true }) res: Response) {
+  async logout(
+    @CurrentUser() user: AuthUser,
+    @Res({ passthrough: true }) res: Response
+  ) {
     await this.logoutUseCase.execute(user.userId);
     clearAuthCookies(res);
   }

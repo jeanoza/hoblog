@@ -13,7 +13,10 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
-import { CurrentUser, type AuthUser } from '../../../common/decorators/current-user.decorator';
+import {
+  CurrentUser,
+  type AuthUser,
+} from '../../../common/decorators/current-user.decorator';
 import { CreateActivityUseCase } from '../application/create-activity.usecase';
 import { ListActivitiesUseCase } from '../application/list-activities.usecase';
 import { GetActivityUseCase } from '../application/get-activity.usecase';
@@ -21,9 +24,17 @@ import { UpdateActivityUseCase } from '../application/update-activity.usecase';
 import { DeleteActivityUseCase } from '../application/delete-activity.usecase';
 import { CreateActivityDto } from './dto/create-activity.dto';
 import { UpdateActivityDto } from './dto/update-activity.dto';
-import type { ActivitySort, ActivitySortField } from '../domain/activity.repository.interface';
+import type {
+  ActivitySort,
+  ActivitySortField,
+} from '../domain/activity.repository.interface';
 
-const ALLOWED_SORT_FIELDS = new Set<ActivitySortField>(['createdAt', 'updatedAt', 'date', 'title']);
+const ALLOWED_SORT_FIELDS = new Set<ActivitySortField>([
+  'createdAt',
+  'updatedAt',
+  'date',
+  'title',
+]);
 
 function parseSort(raw?: string): ActivitySort | undefined {
   if (!raw) return undefined;

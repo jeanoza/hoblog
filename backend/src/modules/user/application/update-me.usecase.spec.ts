@@ -31,7 +31,9 @@ describe('UpdateMeUseCase', () => {
     const result = await useCase.execute(1, { name: 'New Name' });
 
     expect(result.name).toBe('New Name');
-    expect(mockUserRepository.update).toHaveBeenCalledWith(1, { name: 'New Name' });
+    expect(mockUserRepository.update).toHaveBeenCalledWith(1, {
+      name: 'New Name',
+    });
   });
 
   it('does not expose sensitive fields', async () => {

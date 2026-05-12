@@ -1,4 +1,9 @@
-import { Injectable, Inject, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { ACTIVITY_REPOSITORY } from '../../activity/domain/activity.repository.interface';
 import type { IActivityRepository } from '../../activity/domain/activity.repository.interface';
 import { PHOTO_REPOSITORY } from '../domain/photo.repository.interface';

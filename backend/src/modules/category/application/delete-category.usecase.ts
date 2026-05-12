@@ -1,4 +1,9 @@
-import { Injectable, Inject, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { CATEGORY_REPOSITORY } from '../domain/category.repository.interface';
 import type { ICategoryRepository } from '../domain/category.repository.interface';
 

@@ -12,7 +12,10 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
-import { CurrentUser, type AuthUser } from '../../../common/decorators/current-user.decorator';
+import {
+  CurrentUser,
+  type AuthUser,
+} from '../../../common/decorators/current-user.decorator';
 import { ListCategoriesUseCase } from '../application/list-categories.usecase';
 import { CreateCategoryUseCase } from '../application/create-category.usecase';
 import { RenameCategoryUseCase } from '../application/rename-category.usecase';

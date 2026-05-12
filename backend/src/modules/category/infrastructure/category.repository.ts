@@ -20,7 +20,10 @@ export class CategoryRepository implements ICategoryRepository {
     return category ? new CategoryEntity(category) : null;
   }
 
-  async create(data: { name: string; userId: number }): Promise<CategoryEntity> {
+  async create(data: {
+    name: string;
+    userId: number;
+  }): Promise<CategoryEntity> {
     const category = await this.prisma.category.create({ data });
     return new CategoryEntity(category);
   }

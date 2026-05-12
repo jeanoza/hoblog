@@ -27,7 +27,9 @@ describe('UserRepository', () => {
 
   describe('findByEmail', () => {
     it('should return a UserEntity when the user exists', async () => {
-      (mockPrisma.user.findUnique as jest.Mock).mockResolvedValue(mockPrismaUser);
+      (mockPrisma.user.findUnique as jest.Mock).mockResolvedValue(
+        mockPrismaUser
+      );
 
       const result = await repository.findByEmail('test@example.com');
 
@@ -46,7 +48,9 @@ describe('UserRepository', () => {
 
   describe('findById', () => {
     it('should return a UserEntity when the user exists', async () => {
-      (mockPrisma.user.findUnique as jest.Mock).mockResolvedValue(mockPrismaUser);
+      (mockPrisma.user.findUnique as jest.Mock).mockResolvedValue(
+        mockPrismaUser
+      );
 
       const result = await repository.findById(1);
 
@@ -76,7 +80,11 @@ describe('UserRepository', () => {
       expect(result).toBeInstanceOf(UserEntity);
       expect(result.email).toBe('test@example.com');
       expect(mockPrisma.user.create).toHaveBeenCalledWith({
-        data: { email: 'test@example.com', name: 'Test User', passwordHash: 'hashed' },
+        data: {
+          email: 'test@example.com',
+          name: 'Test User',
+          passwordHash: 'hashed',
+        },
       });
     });
   });

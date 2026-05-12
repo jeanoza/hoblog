@@ -15,7 +15,9 @@ const mockRepo: jest.Mocked<IActivityRepository> = {
   delete: jest.fn(),
 };
 
-const makeActivity = (overrides: Partial<ConstructorParameters<typeof ActivityEntity>[0]> = {}) =>
+const makeActivity = (
+  overrides: Partial<ConstructorParameters<typeof ActivityEntity>[0]> = {}
+) =>
   new ActivityEntity({
     id: 1,
     title: 'Morning Run',
@@ -117,13 +119,17 @@ describe('UpdateActivityUseCase', () => {
   it('throws NotFoundException when activity does not exist', async () => {
     mockRepo.findById.mockResolvedValue(null);
 
-    await expect(useCase.execute(99, 1, { title: 'x' })).rejects.toThrow(NotFoundException);
+    await expect(useCase.execute(99, 1, { title: 'x' })).rejects.toThrow(
+      NotFoundException
+    );
   });
 
   it('throws ForbiddenException when activity belongs to another user', async () => {
     mockRepo.findById.mockResolvedValue(makeActivity({ userId: 2 }));
 
-    await expect(useCase.execute(1, 1, { title: 'x' })).rejects.toThrow(ForbiddenException);
+    await expect(useCase.execute(1, 1, { title: 'x' })).rejects.toThrow(
+      ForbiddenException
+    );
   });
 });
 

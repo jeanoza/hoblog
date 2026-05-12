@@ -52,7 +52,10 @@ describe('LoginUseCase', () => {
       accessToken: 'mock.access.token',
       refreshToken: 'mock.refresh.token',
     });
-    expect(mockUserRepository.updateRefreshToken).toHaveBeenCalledWith(1, expect.any(String));
+    expect(mockUserRepository.updateRefreshToken).toHaveBeenCalledWith(
+      1,
+      expect.any(String)
+    );
   });
 
   it('should throw UnauthorizedException if user is not found', async () => {

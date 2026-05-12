@@ -7,6 +7,7 @@ import type { IPhotoRepository } from '../domain/photo.repository.interface';
 import type { IActivityRepository } from '../../activity/domain/activity.repository.interface';
 import { PhotoEntity } from '../domain/photo.entity';
 import { ActivityEntity } from '../../activity/domain/activity.entity';
+import { StorageService } from 'src/common/storage/storage.service';
 
 const mockActivityRepo: jest.Mocked<IActivityRepository> = {
   findById: jest.fn(),
@@ -59,26 +60,34 @@ describe('CreatePhotoUseCase', () => {
     mockActivityRepo.findById.mockResolvedValue(activity);
     mockPhotoRepo.create.mockResolvedValue(photo);
 
-    const result = await useCase.execute({ userId: 1, activityId: 1, url: photo.url });
+    const result = await useCase.execute({
+      userId: 1,
+      activityId: 1,
+      url: photo.url,
+    });
 
     expect(result.url).toBe(photo.url);
-    expect(mockPhotoRepo.create).toHaveBeenCalledWith({ url: photo.url, order: 0, activityId: 1 });
+    expect(mockPhotoRepo.create).toHaveBeenCalledWith({
+      url: photo.url,
+      order: 0,
+      activityId: 1,
+    });
   });
 
   it('throws NotFoundException when activity does not exist', async () => {
     mockActivityRepo.findById.mockResolvedValue(null);
 
-    await expect(useCase.execute({ userId: 1, activityId: 99, url: 'url' })).rejects.toThrow(
-      NotFoundException
-    );
+    await expect(
+      useCase.execute({ userId: 1, activityId: 99, url: 'url' })
+    ).rejects.toThrow(NotFoundException);
   });
 
   it('throws ForbiddenException when user does not own the activity', async () => {
     mockActivityRepo.findById.mockResolvedValue(activity);
 
-    await expect(useCase.execute({ userId: 2, activityId: 1, url: 'url' })).rejects.toThrow(
-      ForbiddenException
-    );
+    await expect(
+      useCase.execute({ userId: 2, activityId: 1, url: 'url' })
+    ).rejects.toThrow(ForbiddenException);
   });
 });
 
@@ -87,7 +96,11 @@ describe('ListPhotosUseCase', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useCase = new ListPhotosUseCase(mockActivityRepo, mockPhotoRepo, mockStorageService as any);
+    useCase = new ListPhotosUseCase(
+      mockActivityRepo,
+      mockPhotoRepo,
+      mockStorageService as unknown as StorageService
+    );
   });
 
   it('returns photos for owned activity', async () => {
@@ -128,7 +141,11 @@ describe('DeletePhotoUseCase', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useCase = new DeletePhotoUseCase(mockActivityRepo, mockPhotoRepo, mockStorageService as any);
+    useCase = new DeletePhotoUseCase(
+      mockActivityRepo,
+      mockPhotoRepo,
+      mockStorageService as unknown as StorageService
+    );
   });
 
   it('deletes photo and GCS file for owned activity', async () => {
@@ -138,7 +155,9 @@ describe('DeletePhotoUseCase', () => {
     mockPhotoRepo.delete.mockResolvedValue();
 
     await expect(useCase.execute(1, 1)).resolves.toBeUndefined();
-    expect(mockStorageService.deleteFile).toHaveBeenCalledWith('photos/1/1/123.jpg');
+    expect(mockStorageService.deleteFile).toHaveBeenCalledWith(
+      'photos/1/1/123.jpg'
+    );
     expect(mockPhotoRepo.delete).toHaveBeenCalledWith(1);
   });
 
@@ -172,15 +191,26 @@ describe('GetUploadUrlUseCase', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useCase = new GetUploadUrlUseCase(mockActivityRepo, mockStorageService as any);
+    useCase = new GetUploadUrlUseCase(
+      mockActivityRepo,
+      mockStorageService as unknown as StorageService
+    );
   });
 
   it('returns upload url and destination for owned activity', async () => {
     mockActivityRepo.findById.mockResolvedValue(activity);
-    mockStorageService.getSignedUploadUrl.mockResolvedValue('https://signed.upload.url');
-    mockStorageService.getPublicUrl.mockReturnValue('https://public.url/photo.jpg');
+    mockStorageService.getSignedUploadUrl.mockResolvedValue(
+      'https://signed.upload.url'
+    );
+    mockStorageService.getPublicUrl.mockReturnValue(
+      'https://public.url/photo.jpg'
+    );
 
-    const result = await useCase.execute({ userId: 1, activityId: 1, contentType: 'image/jpeg' });
+    const result = await useCase.execute({
+      userId: 1,
+      activityId: 1,
+      contentType: 'image/jpeg',
+    });
 
     expect(result.uploadUrl).toBe('https://signed.upload.url');
     expect(result.publicUrl).toBe('https://public.url/photo.jpg');

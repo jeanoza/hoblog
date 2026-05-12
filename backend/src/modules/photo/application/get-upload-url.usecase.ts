@@ -1,4 +1,9 @@
-import { Injectable, Inject, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { StorageService } from '../../../common/storage/storage.service';
 import { ACTIVITY_REPOSITORY } from '../../activity/domain/activity.repository.interface';
 import type { IActivityRepository } from '../../activity/domain/activity.repository.interface';
@@ -35,7 +40,10 @@ export class GetUploadUrlUseCase {
     const ext = input.contentType.split('/')[1] ?? 'jpg';
     const destination = `photos/${input.userId}/${input.activityId}/${Date.now()}.${ext}`;
 
-    const uploadUrl = await this.storageService.getSignedUploadUrl(destination, input.contentType);
+    const uploadUrl = await this.storageService.getSignedUploadUrl(
+      destination,
+      input.contentType
+    );
     const publicUrl = this.storageService.getPublicUrl(destination);
 
     return { uploadUrl, destination, publicUrl };

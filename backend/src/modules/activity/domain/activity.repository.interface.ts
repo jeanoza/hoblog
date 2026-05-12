@@ -12,7 +12,12 @@ export interface IActivityRepository {
   findById(id: number): Promise<ActivityEntity | null>;
   findAllByUserId(
     userId: number,
-    options?: { skip?: number; take?: number; categoryId?: number; sort?: ActivitySort }
+    options?: {
+      skip?: number;
+      take?: number;
+      categoryId?: number;
+      sort?: ActivitySort;
+    }
   ): Promise<ActivityEntity[]>;
   create(data: {
     title: string;

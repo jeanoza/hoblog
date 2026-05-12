@@ -16,7 +16,11 @@ export class RenameCategoryUseCase {
     private readonly categoryRepository: ICategoryRepository
   ) {}
 
-  async execute(userId: number, categoryId: number, name: string): Promise<CategoryEntity> {
+  async execute(
+    userId: number,
+    categoryId: number,
+    name: string
+  ): Promise<CategoryEntity> {
     const category = await this.categoryRepository.findById(categoryId);
     if (!category) {
       throw new NotFoundException('Category not found');

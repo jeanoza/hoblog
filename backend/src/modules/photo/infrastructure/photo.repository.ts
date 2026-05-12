@@ -20,7 +20,11 @@ export class PhotoRepository implements IPhotoRepository {
     return photos.map((p) => new PhotoEntity(p));
   }
 
-  async create(data: { url: string; order: number; activityId: number }): Promise<PhotoEntity> {
+  async create(data: {
+    url: string;
+    order: number;
+    activityId: number;
+  }): Promise<PhotoEntity> {
     const photo = await this.prisma.photo.create({ data });
     return new PhotoEntity(photo);
   }

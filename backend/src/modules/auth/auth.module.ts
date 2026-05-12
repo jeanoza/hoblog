@@ -21,6 +21,12 @@ import { JwtSignOptions } from '@nestjs/jwt';
     }),
   ],
   controllers: [AuthController],
-  providers: [LoginUseCase, RegisterUseCase, RefreshUseCase, LogoutUseCase, JwtStrategy],
+  providers: [
+    LoginUseCase,
+    RegisterUseCase,
+    RefreshUseCase,
+    LogoutUseCase,
+    JwtStrategy,
+  ],
 })
 export class AuthModule {}

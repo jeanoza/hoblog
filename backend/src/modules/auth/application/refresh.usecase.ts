@@ -18,13 +18,18 @@ export class RefreshUseCase {
     private readonly loginUseCase: LoginUseCase
   ) {}
 
-  async execute(input: RefreshInput): Promise<{ accessToken: string; refreshToken: string }> {
+  async execute(
+    input: RefreshInput
+  ): Promise<{ accessToken: string; refreshToken: string }> {
     let payload: { sub: number; email: string };
 
     try {
-      payload = this.jwtService.verify<{ sub: number; email: string }>(input.refreshToken, {
-        secret: process.env.JWT_REFRESH_SECRET ?? 'changeme-refresh',
-      });
+      payload = this.jwtService.verify<{ sub: number; email: string }>(
+        input.refreshToken,
+        {
+          secret: process.env.JWT_REFRESH_SECRET ?? 'changeme-refresh',
+        }
+      );
     } catch {
       throw new UnauthorizedException('Invalid refresh token');
     }
@@ -34,7 +39,10 @@ export class RefreshUseCase {
       throw new UnauthorizedException('Invalid refresh token');
     }
 
-    const isValid = await bcrypt.compare(input.refreshToken, user.refreshTokenHash);
+    const isValid = await bcrypt.compare(
+      input.refreshToken,
+      user.refreshTokenHash
+    );
     if (!isValid) {
       throw new UnauthorizedException('Invalid refresh token');
     }

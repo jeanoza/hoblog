@@ -1,4 +1,8 @@
-import { ConflictException, ForbiddenException, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateCategoryUseCase } from './create-category.usecase';
 import { ListCategoriesUseCase } from './list-categories.usecase';
 import { RenameCategoryUseCase } from './rename-category.usecase';
@@ -60,13 +64,18 @@ describe('CreateCategoryUseCase', () => {
 
     expect(result.name).toBe('Running');
     expect(result.userId).toBe(1);
-    expect(mockRepo.create).toHaveBeenCalledWith({ name: 'Running', userId: 1 });
+    expect(mockRepo.create).toHaveBeenCalledWith({
+      name: 'Running',
+      userId: 1,
+    });
   });
 
   it('throws ConflictException on duplicate name', async () => {
     mockRepo.create.mockRejectedValue(new Error('Unique constraint'));
 
-    await expect(useCase.execute(1, 'Running')).rejects.toThrow(ConflictException);
+    await expect(useCase.execute(1, 'Running')).rejects.toThrow(
+      ConflictException
+    );
   });
 });
 
@@ -93,14 +102,18 @@ describe('RenameCategoryUseCase', () => {
   it('throws NotFoundException when category does not exist', async () => {
     mockRepo.findById.mockResolvedValue(null);
 
-    await expect(useCase.execute(1, 99, 'Jogging')).rejects.toThrow(NotFoundException);
+    await expect(useCase.execute(1, 99, 'Jogging')).rejects.toThrow(
+      NotFoundException
+    );
   });
 
   it('throws ForbiddenException when user does not own the category', async () => {
     const existing = new CategoryEntity({ id: 1, name: 'Running', userId: 2 });
     mockRepo.findById.mockResolvedValue(existing);
 
-    await expect(useCase.execute(1, 1, 'Jogging')).rejects.toThrow(ForbiddenException);
+    await expect(useCase.execute(1, 1, 'Jogging')).rejects.toThrow(
+      ForbiddenException
+    );
   });
 
   it('throws ConflictException on duplicate name', async () => {
@@ -108,7 +121,9 @@ describe('RenameCategoryUseCase', () => {
     mockRepo.findById.mockResolvedValue(existing);
     mockRepo.update.mockRejectedValue(new Error('Unique constraint'));
 
-    await expect(useCase.execute(1, 1, 'Cycling')).rejects.toThrow(ConflictException);
+    await expect(useCase.execute(1, 1, 'Cycling')).rejects.toThrow(
+      ConflictException
+    );
   });
 });
 
