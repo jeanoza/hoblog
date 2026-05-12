@@ -114,7 +114,7 @@ describe('ListPhotosUseCase', () => {
   it('falls back to original url when url does not match GCS pattern', async () => {
     mockActivityRepo.findById.mockResolvedValue(activity);
     const nonGcsPhoto = { ...photo, url: 'https://other.cdn.com/photo.jpg' };
-    mockPhotoRepo.findAllByActivityId.mockResolvedValue([nonGcsPhoto as any]);
+    mockPhotoRepo.findAllByActivityId.mockResolvedValue([nonGcsPhoto]);
 
     const result = await useCase.execute(1, 1);
 
@@ -157,7 +157,7 @@ describe('DeletePhotoUseCase', () => {
 
   it('skips GCS delete when url does not match GCS pattern', async () => {
     const nonGcsPhoto = { ...photo, url: 'https://other.cdn.com/photo.jpg' };
-    mockPhotoRepo.findById.mockResolvedValue(nonGcsPhoto as any);
+    mockPhotoRepo.findById.mockResolvedValue(nonGcsPhoto);
     mockActivityRepo.findById.mockResolvedValue(activity);
     mockPhotoRepo.delete.mockResolvedValue();
 
