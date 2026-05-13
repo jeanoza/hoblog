@@ -1,12 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { api } from '@/lib/api';
 import { useAuthStore } from '@/store/auth.store';
-import { useCategories, CATEGORIES_QUERY_KEY } from '@/hooks/useCategories';
 import { ThemeToggle } from '@/components/layout/ThemeToggle';
-import { Icon } from '@/components/ui/Icon';
+import { CategoryList } from '@/components/category/CategoryList';
 
 interface SidebarProps {
   selectedCategoryId: number | null;
@@ -14,39 +10,8 @@ interface SidebarProps {
 }
 
 export function Sidebar({ selectedCategoryId, onSelectCategory }: SidebarProps) {
-  const queryClient = useQueryClient();
   const logout = useAuthStore((s) => s.logout);
   const user = useAuthStore((s) => s.user);
-  const [newName, setNewName] = useState('');
-  const [showInput, setShowInput] = useState(false);
-
-  const { data: categories = [] } = useCategories();
-
-  const createCategory = useMutation({
-    mutationFn: (name: string) => api.post('/categories', { name }),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: CATEGORIES_QUERY_KEY });
-      setNewName('');
-      setShowInput(false);
-    },
-  });
-
-  const deleteCategory = useMutation({
-    mutationFn: (id: number) => api.delete(`/categories/${id}`),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: CATEGORIES_QUERY_KEY });
-    },
-  });
-
-  const handleAdd = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (newName.trim()) createCategory.mutate(newName.trim());
-  };
-
-  const handleCancel = () => {
-    setNewName('');
-    setShowInput(false);
-  };
 
   return (
     <aside className="flex h-screen w-68 flex-col border-r border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-950">
@@ -59,85 +24,10 @@ export function Sidebar({ selectedCategoryId, onSelectCategory }: SidebarProps) 
       </div>
 
       <nav className="flex-1 overflow-y-auto px-3 py-4">
-        <button
-          onClick={() => onSelectCategory(null)}
-          className={`mb-1 flex w-full cursor-pointer items-center rounded-lg px-3 py-2 text-sm font-medium transition ${
-            selectedCategoryId === null
-              ? 'bg-neutral-900 text-white dark:bg-neutral-100 dark:text-neutral-900'
-              : 'text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-800'
-          }`}
-        >
-          All
-        </button>
-
-        <div className="mt-3 mb-1 px-3 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
-          Categories
-        </div>
-
-        {categories.map((cat) => (
-          <div key={cat.id} className="group relative flex items-center">
-            <button
-              onClick={() => onSelectCategory(cat.id)}
-              className={`flex flex-1 cursor-pointer items-center rounded-lg px-3 py-2 text-sm transition ${
-                selectedCategoryId === cat.id
-                  ? 'bg-neutral-900 font-medium text-white dark:bg-neutral-100 dark:text-neutral-900'
-                  : 'text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-800'
-              }`}
-            >
-              <span className="mr-2 text-base">
-                {cat.name}
-              </span>
-            </button>
-            <button
-              onClick={() => deleteCategory.mutate(cat.id)}
-              disabled={deleteCategory.isPending}
-              className="absolute right-1 hidden cursor-pointer rounded p-1 text-neutral-400 hover:text-red-500 group-hover:flex dark:text-neutral-500 dark:hover:text-red-400"
-              aria-label={`Delete ${cat.name}`}
-            >
-              <Icon name="trash" size={13} />
-            </button>
-          </div>
-        ))}
-
-        <div className="mt-2 px-3">
-          {showInput ? (
-            <form onSubmit={handleAdd} className="flex items-center gap-1">
-              <input
-                autoFocus
-                value={newName}
-                onChange={(e) => setNewName(e.target.value)}
-                placeholder="Category name"
-                className="flex-1 rounded-md border border-neutral-200 bg-white px-2 py-1.5 text-xs text-neutral-900 outline-none focus:border-neutral-900 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:focus:border-neutral-400"
-              />
-              {/* confirm */}
-              <button
-                type="submit"
-                disabled={createCategory.isPending}
-                aria-label="Confirm"
-                className="cursor-pointer rounded-md p-1.5 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900 disabled:opacity-50 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100"
-              >
-                <Icon name="check" size={14} strokeWidth={2.5} />
-              </button>
-              {/* cancel */}
-              <button
-                type="button"
-                onClick={handleCancel}
-                aria-label="Cancel"
-                className="cursor-pointer rounded-md p-1.5 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100"
-              >
-                <Icon name="x" size={14} strokeWidth={2.5} />
-              </button>
-            </form>
-          ) : (
-            <button
-              onClick={() => setShowInput(true)}
-              className="mt-1 flex w-full cursor-pointer items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700 dark:text-neutral-500 dark:hover:bg-neutral-800 dark:hover:text-neutral-300"
-            >
-              <Icon name="plus" size={14} strokeWidth={2.5} />
-              Add category
-            </button>
-          )}
-        </div>
+        <CategoryList
+          selectedCategoryId={selectedCategoryId}
+          onSelectCategory={onSelectCategory}
+        />
       </nav>
 
       <div className="border-t border-neutral-200 px-4 py-4 dark:border-neutral-800">
