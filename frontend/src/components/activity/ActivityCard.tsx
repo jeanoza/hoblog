@@ -90,7 +90,6 @@ function PhotoCarousel({ photos }: { photos: Photo[] }) {
 export function ActivityCard({ activity }: ActivityCardProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { data: categories = [] } = useCategories();
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuPos, setMenuPos] = useState({ top: 0, left: 0 });
   const [confirmOpen, setConfirmOpen] = useState(false);
