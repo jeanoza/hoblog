@@ -10,21 +10,24 @@ model User {
   id               Int        @id @default(autoincrement())
   email            String     @unique
   name             String
-  passwordHash     String
-  refreshTokenHash String?
-  createdAt        DateTime   @default(now())
+  passwordHash     String     @map("password_hash")
+  refreshTokenHash String?    @map("refresh_token_hash")
+  createdAt        DateTime   @default(now()) @map("created_at")
   activities       Activity[]
   categories       Category[]
+
+  @@map("users")
 }
 
 model Category {
   id         Int        @id @default(autoincrement())
   name       String
-  userId     Int
+  userId     Int        @map("user_id")
   activities Activity[]
   user       User       @relation(fields: [userId], references: [id])
 
   @@unique([userId, name])
+  @@map("categories")
 }
 
 model Activity {
@@ -32,21 +35,25 @@ model Activity {
   title      String
   note       String?
   date       DateTime
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-  deletedAt  DateTime?
-  userId     Int
-  categoryId Int
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+  deletedAt  DateTime? @map("deleted_at")
+  userId     Int       @map("user_id")
+  categoryId Int       @map("category_id")
   user       User      @relation(fields: [userId], references: [id])
   category   Category  @relation(fields: [categoryId], references: [id])
   photos     Photo[]
+
+  @@map("activities")
 }
 
 model Photo {
   id         Int      @id @default(autoincrement())
   url        String
   order      Int      @default(0)
-  createdAt  DateTime @default(now())
-  activityId Int
+  createdAt  DateTime @default(now()) @map("created_at")
+  activityId Int      @map("activity_id")
   activity   Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+
+  @@map("photos")
 }

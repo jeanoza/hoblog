@@ -8,6 +8,10 @@ import { seed } from '../prisma/seed';
 export default async function globalSetup() {
   dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('E2E tests must not run in production.');
+  }
+
   execSync('npx prisma db push --accept-data-loss', {
     env: { ...process.env },
     stdio: 'inherit',
@@ -18,7 +22,7 @@ export default async function globalSetup() {
 
   try {
     await prisma.$executeRawUnsafe(
-      'TRUNCATE TABLE "User", "Category", "Activity" RESTART IDENTITY CASCADE'
+      'TRUNCATE TABLE "users", "categories", "activities" RESTART IDENTITY CASCADE'
     );
     await seed(prisma);
   } finally {

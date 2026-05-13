@@ -15,7 +15,14 @@ export async function seed(prisma: PrismaClient) {
     },
   });
 
-  const defaultCategories = ['Running', 'Reading', 'Cooking', 'Gaming', 'Cycling'];
+  const defaultCategories = [
+    'Running',
+    'Reading',
+    'Cooking',
+    'Gaming',
+    'Cycling',
+    'Other',
+  ];
   for (const name of defaultCategories) {
     await prisma.category.upsert({
       where: { userId_name: { userId: admin.id, name } },
