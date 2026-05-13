@@ -31,20 +31,40 @@ model Category {
 }
 
 model Activity {
-  id         Int       @id @default(autoincrement())
+  id         Int           @id @default(autoincrement())
   title      String
   note       String?
   date       DateTime
-  createdAt  DateTime  @default(now()) @map("created_at")
-  updatedAt  DateTime  @updatedAt @map("updated_at")
-  deletedAt  DateTime? @map("deleted_at")
-  userId     Int       @map("user_id")
-  categoryId Int       @map("category_id")
-  user       User      @relation(fields: [userId], references: [id])
-  category   Category  @relation(fields: [categoryId], references: [id])
+  createdAt  DateTime      @default(now()) @map("created_at")
+  updatedAt  DateTime      @updatedAt @map("updated_at")
+  deletedAt  DateTime?     @map("deleted_at")
+  userId     Int           @map("user_id")
+  categoryId Int           @map("category_id")
+  user       User          @relation(fields: [userId], references: [id])
+  category   Category      @relation(fields: [categoryId], references: [id])
   photos     Photo[]
+  tags       ActivityTag[]
 
   @@map("activities")
+}
+
+model Tag {
+  id         Int           @id @default(autoincrement())
+  name       String        @unique
+  createdAt  DateTime      @default(now()) @map("created_at")
+  activities ActivityTag[]
+
+  @@map("tags")
+}
+
+model ActivityTag {
+  activityId Int      @map("activity_id")
+  tagId      Int      @map("tag_id")
+  activity   Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  tag        Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([activityId, tagId])
+  @@map("activity_tags")
 }
 
 model Photo {

@@ -30,6 +30,22 @@ export async function seed(prisma: PrismaClient) {
       create: { name, userId: admin.id },
     });
   }
+
+  const defaultTags = [
+    'outdoor',
+    'indoor',
+    'morning',
+    'evening',
+    'solo',
+    'social',
+  ];
+  for (const name of defaultTags) {
+    await prisma.tag.upsert({
+      where: { name },
+      update: {},
+      create: { name },
+    });
+  }
 }
 
 async function main() {

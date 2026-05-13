@@ -22,7 +22,7 @@ export default async function globalSetup() {
 
   try {
     await prisma.$executeRawUnsafe(
-      'TRUNCATE TABLE "users", "categories", "activities" RESTART IDENTITY CASCADE'
+      'TRUNCATE TABLE "users", "categories", "activities", "tags", "activity_tags" RESTART IDENTITY CASCADE'
     );
     await seed(prisma);
   } finally {

@@ -9,7 +9,7 @@ alwaysApply: false
 This project uses prettier with the following config (`backend/.prettierrc`):
 - `singleQuote: true`
 - `trailingComma: "es5"`
-- `printWidth: 100`
+- `printWidth: 80`
 
 Always apply these rules when writing or editing code.
 

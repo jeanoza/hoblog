@@ -6,6 +6,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { ActivityModule } from './modules/activity/activity.module';
 import { CategoryModule } from './modules/category/category.module';
 import { PhotoModule } from './modules/photo/photo.module';
+import { TagModule } from './modules/tag/tag.module';
 import { StorageModule } from './common/storage/storage.module';
 
 @Module({
@@ -18,6 +19,7 @@ import { StorageModule } from './common/storage/storage.module';
     ActivityModule,
     CategoryModule,
     PhotoModule,
+    TagModule,
   ],
 })
 export class AppModule {}
