@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { DayPicker } from 'react-day-picker';
+import { Icon } from '@/components/ui/Icon';
 
 interface DatePickerProps {
   value: string; // 'YYYY-MM-DD'
@@ -52,9 +53,7 @@ export function DatePicker({ value, onChange, className }: DatePickerProps) {
         onClick={() => setOpen((o) => !o)}
         className="flex w-full cursor-pointer items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-left text-sm text-neutral-900 outline-none transition focus:border-neutral-900 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100 dark:focus:border-neutral-400"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-neutral-400">
-          <rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
-        </svg>
+        <Icon name="calendar" size={14} className="shrink-0 text-neutral-400" />
         <span className={value ? '' : 'text-neutral-400'}>{formatDisplay(value)}</span>
       </button>
 

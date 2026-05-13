@@ -2,6 +2,7 @@
 
 import { useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
+import { Icon } from '@/components/ui/Icon';
 
 interface LightboxProps {
   images: string[];
@@ -43,9 +44,7 @@ export function Lightbox({ images, index, onClose, onIndexChange }: LightboxProp
         className="absolute right-4 top-4 cursor-pointer rounded-full p-2 text-white/70 transition hover:bg-white/10 hover:text-white"
         aria-label="Close"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-        </svg>
+        <Icon name="x" size={22} />
       </button>
 
       {/* Counter */}
@@ -77,9 +76,7 @@ export function Lightbox({ images, index, onClose, onIndexChange }: LightboxProp
             className="absolute left-4 top-1/2 -translate-y-1/2 cursor-pointer rounded-full p-3 text-white/70 transition hover:bg-white/10 hover:text-white"
             aria-label="Previous photo"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="15 18 9 12 15 6" />
-            </svg>
+            <Icon name="chevron-left" size={24} />
           </button>
           <button
             type="button"
@@ -87,9 +84,7 @@ export function Lightbox({ images, index, onClose, onIndexChange }: LightboxProp
             className="absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer rounded-full p-3 text-white/70 transition hover:bg-white/10 hover:text-white"
             aria-label="Next photo"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
+            <Icon name="chevron-right" size={24} />
           </button>
         </>
       )}

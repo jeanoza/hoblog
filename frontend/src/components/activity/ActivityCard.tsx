@@ -9,6 +9,7 @@ import type { Activity, Photo } from '@/lib/types';
 import { useCategories } from '@/hooks/useCategories';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { Lightbox } from '@/components/ui/Lightbox';
+import { Icon } from '@/components/ui/Icon';
 
 interface ActivityCardProps {
   activity: Activity;
@@ -43,9 +44,7 @@ function PhotoCarousel({ photos }: { photos: Photo[] }) {
             className="absolute left-2 top-1/2 -translate-y-1/2 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-black/30 backdrop-blur-sm transition hover:bg-black/50"
             aria-label="Previous photo"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ mixBlendMode: 'difference' }}>
-              <polyline points="15 18 9 12 15 6" />
-            </svg>
+            <Icon name="chevron-left" size={16} strokeWidth={2.5} stroke="white" style={{ mixBlendMode: 'difference' }} />
           </button>
           <button
             type="button"
@@ -53,9 +52,7 @@ function PhotoCarousel({ photos }: { photos: Photo[] }) {
             className="absolute right-2 top-1/2 -translate-y-1/2 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-black/30 backdrop-blur-sm transition hover:bg-black/50"
             aria-label="Next photo"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ mixBlendMode: 'difference' }}>
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
+            <Icon name="chevron-right" size={16} strokeWidth={2.5} stroke="white" style={{ mixBlendMode: 'difference' }} />
           </button>
 
           {/* Dot indicators */}
@@ -140,7 +137,7 @@ export function ActivityCard({ activity }: ActivityCardProps) {
     setMenuOpen((o) => !o);
   };
 
-  const category = categories.find((c) => c.id === activity.categoryId);
+  // const category = categories.find((c) => c.id === activity.categoryId);
 
   const formatDate = (iso: string) => {
     const d = new Date(iso);
@@ -152,10 +149,10 @@ export function ActivityCard({ activity }: ActivityCardProps) {
       {/* Header */}
       <div className="flex items-center gap-3 px-5 py-4">
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-neutral-900 text-sm font-bold text-white dark:bg-neutral-100 dark:text-neutral-900">
-          {category?.name.charAt(0).toUpperCase() ?? '?'}
+          {activity.title.charAt(0).toUpperCase() ?? '?'}
         </div>
         <div className="flex-1">
-          <p className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">{category?.name ?? 'Unknown'}</p>
+          <p className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">{activity.title ?? 'Unknown'}</p>
           <p className="text-xs text-neutral-400 dark:text-neutral-500">{formatDate(activity.date)}</p>
         </div>
 
@@ -167,9 +164,7 @@ export function ActivityCard({ activity }: ActivityCardProps) {
           className="cursor-pointer rounded-lg p-1.5 text-neutral-400 transition hover:bg-neutral-100 hover:text-neutral-700 dark:text-neutral-500 dark:hover:bg-neutral-800 dark:hover:text-neutral-300"
           aria-label="More options"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
-            <circle cx="12" cy="5" r="1.5" /><circle cx="12" cy="12" r="1.5" /><circle cx="12" cy="19" r="1.5" />
-          </svg>
+          <Icon name="dots-vertical" size={15} />
         </button>
 
         {/* Context menu portal */}
@@ -187,10 +182,7 @@ export function ActivityCard({ activity }: ActivityCardProps) {
               }}
               className="flex w-full cursor-pointer items-center gap-2.5 px-3 py-2.5 text-sm text-neutral-700 transition hover:bg-neutral-50 dark:text-neutral-200 dark:hover:bg-neutral-700"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-              </svg>
+              <Icon name="edit" size={14} />
               Edit
             </button>
             <div className="mx-3 border-t border-neutral-100 dark:border-neutral-600" />
@@ -202,12 +194,7 @@ export function ActivityCard({ activity }: ActivityCardProps) {
               }}
               className="flex w-full cursor-pointer items-center gap-2.5 px-3 py-2.5 text-sm text-red-500 transition hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="3 6 5 6 21 6" />
-                <path d="M19 6l-1 14H6L5 6" />
-                <path d="M10 11v6M14 11v6" />
-                <path d="M9 6V4h6v2" />
-              </svg>
+              <Icon name="trash" size={14} />
               Delete
             </button>
           </div>,
@@ -220,9 +207,8 @@ export function ActivityCard({ activity }: ActivityCardProps) {
 
       {/* Body */}
       <div className="px-5 py-4">
-        <p className="font-semibold text-neutral-900 dark:text-neutral-100">{activity.title}</p>
         {activity.note && (
-          <p className="mt-1 text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">{activity.note}</p>
+          <p className="text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">{activity.note}</p>
         )}
       </div>
 

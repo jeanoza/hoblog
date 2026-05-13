@@ -12,6 +12,7 @@ import { FormTextarea } from '@/components/ui/FormTextarea';
 import { PhotoPicker, type PhotoItem } from '@/components/ui/PhotoPicker';
 import { useCategories } from '@/hooks/useCategories';
 import { Spinner } from '@/components/ui/Spinner';
+import { Icon } from '@/components/ui/Icon';
 
 interface PhotoPreview {
   file: File;
@@ -125,9 +126,7 @@ function EditForm({ activityId, initial, initialPhotos }: EditFormProps) {
             className="cursor-pointer rounded-lg p-2 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700 dark:text-neutral-500 dark:hover:bg-neutral-800 dark:hover:text-neutral-300"
             aria-label="Back"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" />
-            </svg>
+            <Icon name="arrow-left" size={18} />
           </button>
           <h1 className="text-xl font-bold text-neutral-900 dark:text-neutral-100">Edit activity</h1>
         </div>

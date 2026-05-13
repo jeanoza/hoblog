@@ -6,6 +6,7 @@ import { useAuthStore } from '@/store/auth.store';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { ActivityFeed } from '@/components/activity/ActivityFeed';
 import { Spinner } from '@/components/ui/Spinner';
+import { Icon } from '@/components/ui/Icon';
 
 export default function HomePage() {
   const router = useRouter();
@@ -46,9 +47,7 @@ export default function HomePage() {
           className="fixed right-8 bottom-8 flex h-14 w-14 cursor-pointer items-center justify-center rounded-full bg-neutral-900 shadow-lg transition hover:bg-neutral-700 dark:bg-neutral-100 dark:hover:bg-neutral-200"
           aria-label="New activity"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="dark:stroke-neutral-900">
-            <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-          </svg>
+          <Icon name="plus" size={22} strokeWidth={2.5} stroke="white" className="dark:stroke-neutral-900" />
         </button>
       </main>
     </div>

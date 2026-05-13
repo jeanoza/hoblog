@@ -6,6 +6,7 @@ import { api } from '@/lib/api';
 import { useAuthStore } from '@/store/auth.store';
 import { useCategories, CATEGORIES_QUERY_KEY } from '@/hooks/useCategories';
 import { ThemeToggle } from '@/components/layout/ThemeToggle';
+import { Icon } from '@/components/ui/Icon';
 
 interface SidebarProps {
   selectedCategoryId: number | null;
@@ -93,12 +94,7 @@ export function Sidebar({ selectedCategoryId, onSelectCategory }: SidebarProps) 
               className="absolute right-1 hidden cursor-pointer rounded p-1 text-neutral-400 hover:text-red-500 group-hover:flex dark:text-neutral-500 dark:hover:text-red-400"
               aria-label={`Delete ${cat.name}`}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="3 6 5 6 21 6" />
-                <path d="M19 6l-1 14H6L5 6" />
-                <path d="M10 11v6M14 11v6" />
-                <path d="M9 6V4h6v2" />
-              </svg>
+              <Icon name="trash" size={13} />
             </button>
           </div>
         ))}
@@ -120,9 +116,7 @@ export function Sidebar({ selectedCategoryId, onSelectCategory }: SidebarProps) 
                 aria-label="Confirm"
                 className="cursor-pointer rounded-md p-1.5 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900 disabled:opacity-50 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
+                <Icon name="check" size={14} strokeWidth={2.5} />
               </button>
               {/* cancel */}
               <button
@@ -131,10 +125,7 @@ export function Sidebar({ selectedCategoryId, onSelectCategory }: SidebarProps) 
                 aria-label="Cancel"
                 className="cursor-pointer rounded-md p-1.5 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18" />
-                  <line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
+                <Icon name="x" size={14} strokeWidth={2.5} />
               </button>
             </form>
           ) : (
@@ -142,10 +133,7 @@ export function Sidebar({ selectedCategoryId, onSelectCategory }: SidebarProps) 
               onClick={() => setShowInput(true)}
               className="mt-1 flex w-full cursor-pointer items-center gap-1.5 rounded-lg px-3 py-2 text-sm text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700 dark:text-neutral-500 dark:hover:bg-neutral-800 dark:hover:text-neutral-300"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="12" y1="5" x2="12" y2="19" />
-                <line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
+              <Icon name="plus" size={14} strokeWidth={2.5} />
               Add category
             </button>
           )}
