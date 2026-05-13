@@ -4,12 +4,13 @@ import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
-import type { Activity, Photo } from '@/lib/types';
+import type { Activity, Photo, Tag } from '@/lib/types';
 import { FormInput } from '@/components/ui/FormInput';
 import { SelectInput } from '@/components/ui/SelectInput';
 import { DateInput } from '@/components/ui/DateInput';
 import { FormTextarea } from '@/components/ui/FormTextarea';
 import { PhotoPicker, type PhotoItem } from '@/components/ui/PhotoPicker';
+import { TagInput } from '@/components/tag/TagInput';
 import { useCategories } from '@/hooks/useCategories';
 import { Spinner } from '@/components/ui/Spinner';
 import { Icon } from '@/components/ui/Icon';
@@ -42,9 +43,10 @@ interface EditFormProps {
   activityId: number;
   initial: Activity;
   initialPhotos: Photo[];
+  initialTags: string[];
 }
 
-function EditForm({ activityId, initial, initialPhotos }: EditFormProps) {
+function EditForm({ activityId, initial, initialPhotos, initialTags }: EditFormProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
 
@@ -55,6 +57,7 @@ function EditForm({ activityId, initial, initialPhotos }: EditFormProps) {
   const [existingPhotos, setExistingPhotos] = useState<Photo[]>(initialPhotos);
   const [deletedPhotoIds, setDeletedPhotoIds] = useState<number[]>([]);
   const [newPhotos, setNewPhotos] = useState<PhotoPreview[]>([]);
+  const [tags, setTags] = useState<string[]>(initialTags);
   const [error, setError] = useState('');
 
   const { data: categories = [] } = useCategories();
@@ -76,10 +79,25 @@ function EditForm({ activityId, initial, initialPhotos }: EditFormProps) {
 
       const nextOrder = existingPhotos.filter((p) => !deletedPhotoIds.includes(p.id)).length;
       await Promise.all(newPhotos.map((p, i) => uploadPhoto(activityId, p, nextOrder + i)));
+
+      // tag diff: add new, remove deleted
+      const toAdd = tags.filter((t) => !initialTags.includes(t));
+      const toRemove = initialTags.filter((t) => !tags.includes(t));
+
+      const { data: activityTags } = await api.get<Tag[]>(`/activities/${activityId}/tags`);
+      const tagIdByName = Object.fromEntries(activityTags.map((t) => [t.name, t.id]));
+
+      await Promise.all([
+        ...toAdd.map((name) => api.post(`/activities/${activityId}/tags`, { name })),
+        ...toRemove
+          .filter((name) => tagIdByName[name] !== undefined)
+          .map((name) => api.delete(`/activities/${activityId}/tags/${tagIdByName[name]}`)),
+      ]);
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['activities'] });
       void queryClient.invalidateQueries({ queryKey: ['photos', activityId] });
+      void queryClient.invalidateQueries({ queryKey: ['tags', 'activity', activityId] });
       router.replace('/');
     },
     onError: (e: Error) => {
@@ -160,6 +178,8 @@ function EditForm({ activityId, initial, initialPhotos }: EditFormProps) {
             placeholder="How was it?"
           />
 
+          <TagInput tags={tags} onChange={setTags} />
+
           <PhotoPicker
             photos={[
               ...existingPhotos.map((photo): PhotoItem => ({
@@ -222,7 +242,15 @@ export default function EditActivityPage() {
     },
   });
 
-  if (activityLoading || photosLoading || !activity || !photos) {
+  const { data: tagData, isLoading: tagsLoading } = useQuery({
+    queryKey: ['tags', 'activity', activityId],
+    queryFn: async () => {
+      const { data } = await api.get<Tag[]>(`/activities/${activityId}/tags`);
+      return data;
+    },
+  });
+
+  if (activityLoading || photosLoading || tagsLoading || !activity || !photos || !tagData) {
     return (
       <div className="flex h-screen items-center justify-center bg-neutral-50 dark:bg-neutral-950">
         <Spinner />
@@ -230,5 +258,12 @@ export default function EditActivityPage() {
     );
   }
 
-  return <EditForm activityId={activityId} initial={activity} initialPhotos={photos} />;
+  return (
+    <EditForm
+      activityId={activityId}
+      initial={activity}
+      initialPhotos={photos}
+      initialTags={tagData.map((t) => t.name)}
+    />
+  );
 }

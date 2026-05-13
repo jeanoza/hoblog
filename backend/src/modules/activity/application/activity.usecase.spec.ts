@@ -26,6 +26,7 @@ const makeActivity = (
     createdAt: new Date('2024-06-01'),
     updatedAt: new Date('2024-06-01'),
     userId: 1,
+    userName: 'Admin',
     categoryId: 1,
     ...overrides,
   });

@@ -11,9 +11,16 @@ export class ActivityRepository implements IActivityRepository {
   async findById(id: number): Promise<ActivityEntity | null> {
     const activity = await this.prisma.activity.findFirst({
       where: { id, deletedAt: null },
+      include: {
+        user: {
+          select: {
+            name: true,
+          },
+        },
+      },
     });
     if (!activity) return null;
-    return new ActivityEntity(activity);
+    return new ActivityEntity({ ...activity, userName: activity.user.name });
   }
 
   async findAllByUserId(
@@ -32,11 +39,13 @@ export class ActivityRepository implements IActivityRepository {
         deletedAt: null,
         ...(options?.categoryId ? { categoryId: options.categoryId } : {}),
       },
+      include: { user: { select: { name: true } } },
       orderBy: { [field]: order },
       skip: options?.skip,
       take: options?.take,
     });
-    return activities.map((a) => new ActivityEntity(a));
+    // prettier-ignore
+    return activities.map((a) => new ActivityEntity({ ...a, userName: a.user.name }));
   }
 
   async create(data: {
@@ -46,8 +55,11 @@ export class ActivityRepository implements IActivityRepository {
     userId: number;
     categoryId: number;
   }): Promise<ActivityEntity> {
-    const activity = await this.prisma.activity.create({ data });
-    return new ActivityEntity(activity);
+    const activity = await this.prisma.activity.create({
+      data,
+      include: { user: { select: { name: true } } },
+    });
+    return new ActivityEntity({ ...activity, userName: activity.user.name });
   }
 
   async update(
@@ -59,8 +71,12 @@ export class ActivityRepository implements IActivityRepository {
       categoryId?: number;
     }
   ): Promise<ActivityEntity> {
-    const activity = await this.prisma.activity.update({ where: { id }, data });
-    return new ActivityEntity(activity);
+    const activity = await this.prisma.activity.update({
+      where: { id },
+      data,
+      include: { user: { select: { name: true } } },
+    });
+    return new ActivityEntity({ ...activity, userName: activity.user.name });
   }
 
   async delete(id: number): Promise<void> {

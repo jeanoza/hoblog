@@ -49,6 +49,7 @@ const makeActivity = (
     createdAt: new Date(),
     updatedAt: new Date(),
     userId: 1,
+    userName: 'Admin',
     categoryId: 1,
     ...overrides,
   });

@@ -7,6 +7,7 @@ export class ActivityEntity {
   readonly updatedAt: Date;
   readonly deletedAt: Date | null;
   readonly userId: number;
+  readonly userName: string;
   readonly categoryId: number;
 
   constructor(data: {
@@ -18,6 +19,7 @@ export class ActivityEntity {
     updatedAt: Date;
     deletedAt?: Date | null;
     userId: number;
+    userName: string;
     categoryId: number;
   }) {
     this.id = data.id;
@@ -28,6 +30,7 @@ export class ActivityEntity {
     this.updatedAt = data.updatedAt;
     this.deletedAt = data.deletedAt ?? null;
     this.userId = data.userId;
+    this.userName = data.userName;
     this.categoryId = data.categoryId;
   }
 

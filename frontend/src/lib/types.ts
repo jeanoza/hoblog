@@ -12,6 +12,7 @@ export interface Activity {
   createdAt: string;
   updatedAt: string;
   userId: number;
+  userName: string;
   categoryId: number;
 }
 
@@ -20,6 +21,12 @@ export interface Photo {
   signedUrl: string;
   order: number;
   activityId: number;
+}
+
+export interface Tag {
+  id: number;
+  name: string;
+  createdAt: string;
 }
 
 export interface User {

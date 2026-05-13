@@ -5,8 +5,8 @@ import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
-import type { Activity, Photo } from '@/lib/types';
-import { useCategories } from '@/hooks/useCategories';
+import type { Activity, Photo, Tag } from '@/lib/types';
+import { TagList } from '@/components/tag/TagList';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { Lightbox } from '@/components/ui/Lightbox';
 import { Icon } from '@/components/ui/Icon';
@@ -104,6 +104,14 @@ export function ActivityCard({ activity }: ActivityCardProps) {
     },
   });
 
+  const { data: tags = [] } = useQuery({
+    queryKey: ['tags', 'activity', activity.id],
+    queryFn: async () => {
+      const { data } = await api.get<Tag[]>(`/activities/${activity.id}/tags`);
+      return data;
+    },
+  });
+
   const deleteActivity = useMutation({
     mutationFn: () => api.delete(`/activities/${activity.id}`),
     onSuccess: () => {
@@ -152,7 +160,11 @@ export function ActivityCard({ activity }: ActivityCardProps) {
         </div>
         <div className="flex-1">
           <p className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">{activity.title ?? 'Unknown'}</p>
-          <p className="text-xs text-neutral-400 dark:text-neutral-500">{formatDate(activity.date)}</p>
+          <p className="text-xs text-neutral-400 dark:text-neutral-500">
+            {formatDate(activity.date)}
+            <span className="mx-1.5">·</span>
+            {activity.userName}
+          </p>
         </div>
 
         {/* Context menu trigger */}
@@ -205,11 +217,16 @@ export function ActivityCard({ activity }: ActivityCardProps) {
       {photos.length > 0 && <PhotoCarousel photos={photos} />}
 
       {/* Body */}
-      <div className="px-5 py-4">
-        {activity.note && (
-          <p className="text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">{activity.note}</p>
-        )}
-      </div>
+      <TagList tags={tags} />
+      {(activity.note || tags.length > 0) && (
+        <div className="space-y-3 px-5 pb-4">
+          {activity.note && (
+            <p className="text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
+              {activity.note}
+            </p>
+          )}
+        </div>
+      )}
 
       <ConfirmDialog
         open={confirmOpen}

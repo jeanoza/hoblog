@@ -10,6 +10,7 @@ import { SelectInput } from '@/components/ui/SelectInput';
 import { DateInput } from '@/components/ui/DateInput';
 import { FormTextarea } from '@/components/ui/FormTextarea';
 import { PhotoPicker, type PhotoItem } from '@/components/ui/PhotoPicker';
+import { TagInput } from '@/components/tag/TagInput';
 import { Icon } from '@/components/ui/Icon';
 
 interface PhotoPreview {
@@ -45,6 +46,7 @@ export default function NewActivityPage() {
   const [date, setDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [categoryId, setCategoryId] = useState<number | ''>('');
   const [photos, setPhotos] = useState<PhotoPreview[]>([]);
+  const [tags, setTags] = useState<string[]>([]);
   const [error, setError] = useState('');
 
   const { data: categories = [] } = useQuery({
@@ -65,6 +67,9 @@ export default function NewActivityPage() {
         categoryId,
       });
       await Promise.all(photos.map((p, i) => uploadPhoto(activity.id, p, i)));
+      await Promise.all(
+        tags.map((name) => api.post(`/activities/${activity.id}/tags`, { name }))
+      );
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['activities'] });
@@ -142,6 +147,8 @@ export default function NewActivityPage() {
             onChange={setNote}
             placeholder="How was it?"
           />
+
+          <TagInput tags={tags} onChange={setTags} />
 
           <PhotoPicker
             photos={photos.map((p, i): PhotoItem => ({
