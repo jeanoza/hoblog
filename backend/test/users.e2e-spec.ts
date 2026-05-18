@@ -1,24 +1,20 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import { Server } from 'http';
-import request from 'supertest';
 import { AppModule } from '../src/app.module';
-import { bootstrapE2eApp } from './bootstrap-e2e-app';
+import { bootstrapE2eApp, E2eAgent, E2eReq } from './bootstrap-e2e-app';
 import { ACCESS_TOKEN_COOKIE } from '../src/common/auth/auth-cookie';
 
 describe('Users (e2e)', () => {
   let app: INestApplication;
-  let server: Server;
-  let agent: ReturnType<typeof request.agent>;
+  let req: E2eReq;
+  let agent: E2eAgent;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
 
-    app = await bootstrapE2eApp(moduleFixture);
-    server = app.getHttpServer() as Server;
-    agent = request.agent(server);
+    ({ app, req, agent } = await bootstrapE2eApp(moduleFixture));
     await agent
       .post('/auth/login')
       .send({ email: 'admin@hoblog.com', password: 'password123' })
@@ -53,11 +49,11 @@ describe('Users (e2e)', () => {
     });
 
     it('returns 401 when no token is provided', async () => {
-      await request(server).get('/users/me').expect(401);
+      await req.get('/users/me').expect(401);
     });
 
     it('returns 401 when token is invalid', async () => {
-      await request(server)
+      await req
         .get('/users/me')
         .set('Cookie', `${ACCESS_TOKEN_COOKIE}=invalid.token.here`)
         .expect(401);
@@ -87,10 +83,7 @@ describe('Users (e2e)', () => {
     });
 
     it('returns 401 when not authenticated', async () => {
-      await request(server)
-        .patch('/users/me')
-        .send({ name: 'Hacker' })
-        .expect(401);
+      await req.patch('/users/me').send({ name: 'Hacker' }).expect(401);
     });
   });
 });

@@ -1,9 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import { Server } from 'http';
-import request from 'supertest';
 import { AppModule } from '../src/app.module';
-import { bootstrapE2eApp } from './bootstrap-e2e-app';
+import { bootstrapE2eApp, E2eAgent, E2eReq } from './bootstrap-e2e-app';
 import { StorageService } from '../src/common/storage/storage.service';
 
 const mockStorageService = {
@@ -21,8 +19,8 @@ const mockStorageService = {
 
 describe('Photos (e2e)', () => {
   let app: INestApplication;
-  let server: Server;
-  let agent: ReturnType<typeof request.agent>;
+  let req: E2eReq;
+  let agent: E2eAgent;
   let activityId: number;
   let photoId: number;
 
@@ -34,9 +32,7 @@ describe('Photos (e2e)', () => {
       .useValue(mockStorageService)
       .compile();
 
-    app = await bootstrapE2eApp(moduleFixture);
-    server = app.getHttpServer() as Server;
-    agent = request.agent(server);
+    ({ app, req, agent } = await bootstrapE2eApp(moduleFixture));
     await agent
       .post('/auth/login')
       .send({ email: 'admin@hoblog.com', password: 'password123' })
@@ -85,7 +81,7 @@ describe('Photos (e2e)', () => {
     });
 
     it('returns 401 when not authenticated', async () => {
-      await request(server)
+      await req
         .post(`/activities/${activityId}/photos/upload-url`)
         .send({ contentType: 'image/jpeg' })
         .expect(401);
@@ -123,7 +119,7 @@ describe('Photos (e2e)', () => {
     });
 
     it('returns 401 when not authenticated', async () => {
-      await request(server)
+      await req
         .post(`/activities/${activityId}/photos`)
         .send({ url: 'https://storage.googleapis.com/bucket/photo.jpg' })
         .expect(401);
@@ -145,7 +141,7 @@ describe('Photos (e2e)', () => {
     });
 
     it('returns 401 when not authenticated', async () => {
-      await request(server).get(`/activities/${activityId}/photos`).expect(401);
+      await req.get(`/activities/${activityId}/photos`).expect(401);
     });
   });
 
@@ -162,7 +158,7 @@ describe('Photos (e2e)', () => {
     });
 
     it('returns 401 when not authenticated', async () => {
-      await request(server)
+      await req
         .delete(`/activities/${activityId}/photos/${photoId}`)
         .expect(401);
     });

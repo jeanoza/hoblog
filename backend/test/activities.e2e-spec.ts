@@ -1,14 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import { Server } from 'http';
-import request from 'supertest';
 import { AppModule } from '../src/app.module';
-import { bootstrapE2eApp } from './bootstrap-e2e-app';
+import { bootstrapE2eApp, E2eAgent, E2eReq } from './bootstrap-e2e-app';
 
 describe('Activities (e2e)', () => {
   let app: INestApplication;
-  let server: Server;
-  let agent: ReturnType<typeof request.agent>;
+  let req: E2eReq;
+  let agent: E2eAgent;
   let createdId: number;
 
   beforeAll(async () => {
@@ -16,9 +14,7 @@ describe('Activities (e2e)', () => {
       imports: [AppModule],
     }).compile();
 
-    app = await bootstrapE2eApp(moduleFixture);
-    server = app.getHttpServer() as Server;
-    agent = request.agent(server);
+    ({ app, req, agent } = await bootstrapE2eApp(moduleFixture));
     await agent
       .post('/auth/login')
       .send({ email: 'admin@hoblog.com', password: 'password123' })
@@ -47,7 +43,7 @@ describe('Activities (e2e)', () => {
     });
 
     it('returns 401 when not authenticated', async () => {
-      await request(server)
+      await req
         .post('/activities')
         .send({ title: 'Morning Run', date: '2024-06-01', categoryId: 1 })
         .expect(401);
@@ -62,7 +58,7 @@ describe('Activities (e2e)', () => {
     });
 
     it('returns 401 when not authenticated', async () => {
-      await request(server).get('/activities').expect(401);
+      await req.get('/activities').expect(401);
     });
   });
 

@@ -1,14 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import { Server } from 'http';
-import request from 'supertest';
 import { AppModule } from '../src/app.module';
-import { bootstrapE2eApp } from './bootstrap-e2e-app';
+import { bootstrapE2eApp, E2eAgent, E2eReq } from './bootstrap-e2e-app';
 
 describe('Tags (e2e)', () => {
   let app: INestApplication;
-  let server: Server;
-  let agent: ReturnType<typeof request.agent>;
+  let req: E2eReq;
+  let agent: E2eAgent;
   let activityId: number;
   let tagId: number;
 
@@ -17,9 +15,7 @@ describe('Tags (e2e)', () => {
       imports: [AppModule],
     }).compile();
 
-    app = await bootstrapE2eApp(moduleFixture);
-    server = app.getHttpServer() as Server;
-    agent = request.agent(server);
+    ({ app, req, agent } = await bootstrapE2eApp(moduleFixture));
     await agent
       .post('/auth/login')
       .send({ email: 'admin@hoblog.com', password: 'password123' })
@@ -52,7 +48,7 @@ describe('Tags (e2e)', () => {
     });
 
     it('returns 401 when not authenticated', async () => {
-      await request(server).get('/tags/search?q=run').expect(401);
+      await req.get('/tags/search?q=run').expect(401);
     });
   });
 
@@ -107,7 +103,7 @@ describe('Tags (e2e)', () => {
     });
 
     it('returns 401 when not authenticated', async () => {
-      await request(server)
+      await req
         .post(`/activities/${activityId}/tags`)
         .send({ name: 'morning' })
         .expect(401);
@@ -127,7 +123,7 @@ describe('Tags (e2e)', () => {
     });
 
     it('returns 401 when not authenticated', async () => {
-      await request(server).get(`/activities/${activityId}/tags`).expect(401);
+      await req.get(`/activities/${activityId}/tags`).expect(401);
     });
   });
 
@@ -141,7 +137,8 @@ describe('Tags (e2e)', () => {
     });
 
     it('returns 401 when not authenticated', async () => {
-      await request(server)
+      // prettier-ignore
+      await req
         .delete(`/activities/${activityId}/tags/${tagId}`)
         .expect(401);
     });
@@ -163,7 +160,7 @@ describe('Tags (e2e)', () => {
     });
 
     it('returns 401 when not authenticated', async () => {
-      await request(server).delete(`/tags/1`).expect(401);
+      await req.delete('/tags/1').expect(401);
     });
   });
 });
