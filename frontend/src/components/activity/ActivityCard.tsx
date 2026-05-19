@@ -15,6 +15,8 @@ interface ActivityCardProps {
   activity: Activity;
 }
 
+const CONTEXT_MENU_WIDTH = 144; // w-36
+
 function PhotoCarousel({ photos }: { photos: Photo[] }) {
   const [index, setIndex] = useState(0);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
@@ -138,8 +140,8 @@ export function ActivityCard({ activity }: ActivityCardProps) {
     if (!triggerRef.current) return;
     const rect = triggerRef.current.getBoundingClientRect();
     setMenuPos({
-      top: rect.top + window.scrollY,
-      left: rect.right + 4,
+      top: rect.top,
+      left: rect.right - CONTEXT_MENU_WIDTH,
     });
     setMenuOpen((o) => !o);
   };
