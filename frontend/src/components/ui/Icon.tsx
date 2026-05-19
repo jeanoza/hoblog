@@ -9,6 +9,7 @@ export type IconName =
   | 'dots-vertical'
   | 'edit'
   | 'image'
+  | 'menu'
   | 'plus'
   | 'trash'
   | 'x';
@@ -56,6 +57,13 @@ const PATHS: Record<IconName, ReactNode> = {
       <rect x="3" y="3" width="18" height="18" rx="2" />
       <circle cx="8.5" cy="8.5" r="1.5" />
       <polyline points="21 15 16 10 5 21" />
+    </>
+  ),
+  'menu': (
+    <>
+      <line x1="3" y1="6" x2="21" y2="6" />
+      <line x1="3" y1="12" x2="21" y2="12" />
+      <line x1="3" y1="18" x2="21" y2="18" />
     </>
   ),
   'plus': (
