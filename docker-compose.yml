@@ -16,8 +16,8 @@ services:
   backend:
     build:
       context: ./backend
-    ports:
-      - "${BACKEND_HOST_PORT}:${BACKEND_PORT}"
+    expose:
+      - "${BACKEND_PORT}"
     env_file:
       - ./backend/.env
     environment:
@@ -37,11 +37,22 @@ services:
       context: ./frontend
       args:
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
-    ports:
-      - "${FRONTEND_HOST_PORT}:${FRONTEND_PORT}"
+    expose:
+      - "${FRONTEND_PORT}"
     environment:
+      NODE_ENV: production
       PORT: ${FRONTEND_PORT}
     depends_on:
+      - backend
+
+  nginx:
+    image: nginx:1.27-alpine
+    ports:
+      - "${NGINX_HOST_PORT}:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - frontend
       - backend
 
 volumes:

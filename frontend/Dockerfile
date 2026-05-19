@@ -8,7 +8,7 @@ RUN npm ci
 COPY . .
 
 # NEXT_PUBLIC_* vars are baked at build time
-ARG NEXT_PUBLIC_API_URL=http://localhost:20002
+ARG NEXT_PUBLIC_API_URL=/api
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 
 RUN npm run build
@@ -17,14 +17,13 @@ RUN npm run build
 FROM node:24-alpine AS runner
 WORKDIR /app
 
-ENV NODE_ENV=production
-ENV PORT=20001
+# NODE_ENV, PORT → set at runtime via docker-compose (root .env)
 
 # standalone output bundles everything needed to run
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
 
-EXPOSE 20001
+# EXPOSE 20001
 
 CMD ["node", "server.js"]
