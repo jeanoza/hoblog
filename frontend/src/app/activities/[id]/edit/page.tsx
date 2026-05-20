@@ -53,7 +53,9 @@ function EditForm({ activityId, initial, initialPhotos, initialTags }: EditFormP
   const [title, setTitle] = useState(initial.title);
   const [note, setNote] = useState(initial.note ?? '');
   const [date, setDate] = useState(initial.date.split('T')[0]);
-  const [categoryId, setCategoryId] = useState<number | ''>(initial.categoryId);
+  const [categoryId, setCategoryId] = useState<number | ''>(
+    initial.categoryId ?? ''
+  );
   const [existingPhotos, setExistingPhotos] = useState<Photo[]>(initialPhotos);
   const [deletedPhotoIds, setDeletedPhotoIds] = useState<number[]>([]);
   const [newPhotos, setNewPhotos] = useState<PhotoPreview[]>([]);
