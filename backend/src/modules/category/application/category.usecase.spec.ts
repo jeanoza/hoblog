@@ -15,6 +15,7 @@ const mockRepo: jest.Mocked<ICategoryRepository> = {
   findById: jest.fn(),
   create: jest.fn(),
   update: jest.fn(),
+  countActiveActivities: jest.fn(),
   delete: jest.fn(),
 };
 
@@ -135,13 +136,24 @@ describe('DeleteCategoryUseCase', () => {
     useCase = new DeleteCategoryUseCase(mockRepo);
   });
 
-  it('deletes the category when user owns it', async () => {
+  it('deletes the category when user owns it and no active activities', async () => {
     const entity = new CategoryEntity({ id: 1, name: 'Running', userId: 1 });
     mockRepo.findById.mockResolvedValue(entity);
+    mockRepo.countActiveActivities.mockResolvedValue(0);
     mockRepo.delete.mockResolvedValue();
 
     await expect(useCase.execute(1, 1)).resolves.toBeUndefined();
+    expect(mockRepo.countActiveActivities).toHaveBeenCalledWith(1);
     expect(mockRepo.delete).toHaveBeenCalledWith(1);
+  });
+
+  it('throws ConflictException when category has active activities', async () => {
+    const entity = new CategoryEntity({ id: 1, name: 'Running', userId: 1 });
+    mockRepo.findById.mockResolvedValue(entity);
+    mockRepo.countActiveActivities.mockResolvedValue(2);
+
+    await expect(useCase.execute(1, 1)).rejects.toThrow(ConflictException);
+    expect(mockRepo.delete).not.toHaveBeenCalled();
   });
 
   it('throws NotFoundException when category does not exist', async () => {

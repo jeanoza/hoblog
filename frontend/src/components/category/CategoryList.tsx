@@ -17,6 +17,7 @@ export function CategoryList({ selectedCategoryId, onSelectCategory }: CategoryL
   const [showInput, setShowInput] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editName, setEditName] = useState('');
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const { data: categories = [] } = useCategories();
 
@@ -42,7 +43,11 @@ export function CategoryList({ selectedCategoryId, onSelectCategory }: CategoryL
   const deleteCategory = useMutation({
     mutationFn: (id: number) => api.delete(`/categories/${id}`),
     onSuccess: () => {
+      setDeleteError(null);
       void queryClient.invalidateQueries({ queryKey: CATEGORIES_QUERY_KEY });
+    },
+    onError: () => {
+      setDeleteError('이 카테고리를 사용 중인 기록이 있어 삭제할 수 없습니다.');
     },
   });
 
@@ -84,6 +89,10 @@ export function CategoryList({ selectedCategoryId, onSelectCategory }: CategoryL
       <div className="mt-3 mb-1 px-3 text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
         Categories
       </div>
+
+      {deleteError && (
+        <p className="mb-2 px-3 text-xs text-red-600 dark:text-red-400">{deleteError}</p>
+      )}
 
       {categories.map((cat) => (
         <div key={cat.id} className="group relative flex items-center">

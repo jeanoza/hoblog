@@ -39,9 +39,9 @@ model Activity {
   updatedAt  DateTime      @updatedAt @map("updated_at")
   deletedAt  DateTime?     @map("deleted_at")
   userId     Int           @map("user_id")
-  categoryId Int           @map("category_id")
+  categoryId Int?          @map("category_id")
   user       User          @relation(fields: [userId], references: [id])
-  category   Category      @relation(fields: [categoryId], references: [id])
+  category   Category?     @relation(fields: [categoryId], references: [id])
   photos     Photo[]
   tags       ActivityTag[]
 

@@ -36,7 +36,19 @@ export class CategoryRepository implements ICategoryRepository {
     return new CategoryEntity(category);
   }
 
+  async countActiveActivities(categoryId: number): Promise<number> {
+    return this.prisma.activity.count({
+      where: { categoryId, deletedAt: null },
+    });
+  }
+
   async delete(id: number): Promise<void> {
-    await this.prisma.category.delete({ where: { id } });
+    await this.prisma.$transaction([
+      this.prisma.activity.updateMany({
+        where: { categoryId: id },
+        data: { categoryId: null },
+      }),
+      this.prisma.category.delete({ where: { id } }),
+    ]);
   }
 }

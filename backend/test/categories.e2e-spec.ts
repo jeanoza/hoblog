@@ -134,6 +134,49 @@ describe('Categories (e2e)', () => {
       await agent.delete('/categories/999999').expect(404);
     });
 
+    it('returns 409 when category has active activities', async () => {
+      const createRes = await agent
+        .post('/categories')
+        .send({ name: 'In Use Category' })
+        .expect(201);
+
+      const { id: categoryId } = createRes.body as { id: number };
+
+      await agent
+        .post('/activities')
+        .send({
+          title: 'Blocks Category Delete',
+          date: '2024-06-01',
+          categoryId,
+        })
+        .expect(201);
+
+      await agent.delete(`/categories/${categoryId}`).expect(409);
+    });
+
+    it('deletes category when only soft-deleted activities reference it', async () => {
+      const createRes = await agent
+        .post('/categories')
+        .send({ name: 'Soft Delete Only Category' })
+        .expect(201);
+
+      const { id: categoryId } = createRes.body as { id: number };
+
+      const activityRes = await agent
+        .post('/activities')
+        .send({
+          title: 'Will Be Soft Deleted',
+          date: '2024-06-01',
+          categoryId,
+        })
+        .expect(201);
+
+      const { id: activityId } = activityRes.body as { id: number };
+      await agent.delete(`/activities/${activityId}`).expect(204);
+
+      await agent.delete(`/categories/${categoryId}`).expect(204);
+    });
+
     it('returns 401 when not authenticated', async () => {
       await req.delete('/categories/1').expect(401);
     });

@@ -13,7 +13,7 @@ export interface Activity {
   updatedAt: string;
   userId: number;
   userName: string;
-  categoryId: number;
+  categoryId: number | null;
 }
 
 export interface Photo {

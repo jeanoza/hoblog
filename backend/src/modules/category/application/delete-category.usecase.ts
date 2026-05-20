@@ -3,6 +3,7 @@ import {
   Inject,
   NotFoundException,
   ForbiddenException,
+  ConflictException,
 } from '@nestjs/common';
 import { CATEGORY_REPOSITORY } from '../domain/category.repository.interface';
 import type { ICategoryRepository } from '../domain/category.repository.interface';
@@ -21,6 +22,11 @@ export class DeleteCategoryUseCase {
     }
     if (category.userId !== userId) {
       throw new ForbiddenException('You do not own this category');
+    }
+    const activeCount =
+      await this.categoryRepository.countActiveActivities(categoryId);
+    if (activeCount > 0) {
+      throw new ConflictException('Category is in use by activities');
     }
     await this.categoryRepository.delete(categoryId);
   }

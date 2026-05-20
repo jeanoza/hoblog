@@ -5,6 +5,7 @@ export interface ICategoryRepository {
   findById(id: number): Promise<CategoryEntity | null>;
   create(data: { name: string; userId: number }): Promise<CategoryEntity>;
   update(id: number, name: string): Promise<CategoryEntity>;
+  countActiveActivities(categoryId: number): Promise<number>;
   delete(id: number): Promise<void>;
 }
 
