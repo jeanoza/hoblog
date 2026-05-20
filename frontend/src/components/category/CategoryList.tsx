@@ -47,7 +47,7 @@ export function CategoryList({ selectedCategoryId, onSelectCategory }: CategoryL
       void queryClient.invalidateQueries({ queryKey: CATEGORIES_QUERY_KEY });
     },
     onError: () => {
-      setDeleteError('이 카테고리를 사용 중인 기록이 있어 삭제할 수 없습니다.');
+      setDeleteError('As category is in use by activities, it cannot be deleted.');
     },
   });
 
