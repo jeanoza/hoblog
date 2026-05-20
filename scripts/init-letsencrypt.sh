@@ -37,13 +37,26 @@ fi
 
 mkdir -p "${conf_path}/live/${primary}" "${www_path}"
 
-if [[ ! -f "${conf_path}/live/${primary}/fullchain.pem" ]]; then
-  echo "Creating temporary self-signed cert so nginx can start..."
-  docker compose --profile certbot run --rm --no-deps certbot sh -c "\
-    openssl req -x509 -nodes -newkey rsa:${rsa_key_size} -days 1 \
+create_dummy_cert() {
+  local key="${conf_path}/live/${primary}/privkey.pem"
+  local cert="${conf_path}/live/${primary}/fullchain.pem"
+  if command -v openssl &>/dev/null; then
+    openssl req -x509 -nodes -newkey "rsa:${rsa_key_size}" -days 1 \
+      -keyout "$key" -out "$cert" -subj '/CN=localhost'
+    return
+  fi
+  # certbot image ENTRYPOINT is "certbot" — must override to run openssl
+  docker compose --profile certbot run --rm --no-deps \
+    --entrypoint sh certbot -c \
+    "openssl req -x509 -nodes -newkey rsa:${rsa_key_size} -days 1 \
       -keyout /etc/letsencrypt/live/${primary}/privkey.pem \
       -out /etc/letsencrypt/live/${primary}/fullchain.pem \
       -subj '/CN=localhost'"
+}
+
+if [[ ! -f "${conf_path}/live/${primary}/fullchain.pem" ]]; then
+  echo "Creating temporary self-signed cert so nginx can start..."
+  create_dummy_cert
 fi
 
 export NGINX_CONFIG=nginx.conf
@@ -51,16 +64,17 @@ echo "Starting stack with TLS nginx config..."
 docker compose up -d --build
 
 echo "Requesting Let's Encrypt certificate..."
-docker compose --profile certbot run --rm --no-deps certbot certonly --webroot \
-  -w /var/www/certbot \
-  ${staging_arg} \
-  --email "${email}" \
-  --rsa-key-size "${rsa_key_size}" \
-  --agree-tos \
-  --no-eff-email \
-  --force-renewal \
-  -d "${primary}" \
-  -d "www.${primary}"
+certbot_args=(
+  certonly --webroot -w /var/www/certbot
+  --email "${email}"
+  --rsa-key-size "${rsa_key_size}"
+  --agree-tos --no-eff-email --force-renewal
+  -d "${primary}" -d "www.${primary}"
+)
+if [[ -n "${staging_arg}" ]]; then
+  certbot_args=(--staging "${certbot_args[@]}")
+fi
+docker compose --profile certbot run --rm --no-deps certbot "${certbot_args[@]}"
 
 echo "Reloading nginx with real certificate..."
 docker compose exec nginx nginx -s reload
