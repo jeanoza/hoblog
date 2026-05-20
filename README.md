@@ -71,6 +71,41 @@ Health check: http://localhost/api/health
 
 For cloud deploy, set `FRONTEND_URL` in the **repo root** `.env` to your public origin (e.g. `http://203.0.113.10` or `https://yourdomain.com`). `NEXT_PUBLIC_API_URL=/api` stays relative.
 
+### HTTPS (Let's Encrypt, jeanoza.com)
+
+Prerequisites on the server:
+
+- DNS **A** records for `jeanoza.com` and `www.jeanoza.com` pointing to the host
+- Ports **80** and **443** open in the firewall / security group
+- Root `.env` production values, for example:
+
+```bash
+DOMAIN=jeanoza.com
+CERTBOT_EMAIL=you@example.com
+NGINX_CONFIG=nginx.conf
+NGINX_HOST_PORT=80
+NGINX_HTTPS_PORT=443
+FRONTEND_URL=https://jeanoza.com
+NEXT_PUBLIC_API_URL=/api
+```
+
+First certificate (creates a short-lived dummy cert, then requests a real one and reloads nginx):
+
+```bash
+chmod +x scripts/init-letsencrypt.sh scripts/renew-letsencrypt.sh
+./scripts/init-letsencrypt.sh
+```
+
+Test with staging first (avoids rate limits): set `CERTBOT_STAGING=1` in `.env`, run the script, then set `CERTBOT_STAGING=0` and run again for a production cert.
+
+Renewal (add to host cron, e.g. daily at 03:00):
+
+```bash
+0 3 * * * /path/to/hoblog/scripts/renew-letsencrypt.sh >> /var/log/certbot-renew.log 2>&1
+```
+
+Local Compose keeps HTTP-only via default `NGINX_CONFIG=nginx.http.conf` (no certs required).
+
 ## Environment files
 
 Three env files are intentional: each runtime loads from its own directory. Do not merge into a single file unless you also wire Next/Nest to read from the repo root.
@@ -111,6 +146,9 @@ These appear in more than one file with **different values on purpose**:
 | `POSTGRES_*`, `POSTGRES_HOST_PORT` | Database container |
 | `BACKEND_PORT`, `FRONTEND_PORT` | Internal ports; must match `nginx/nginx.conf` upstreams (`backend:20002`, `frontend:20001`) |
 | `NGINX_HOST_PORT` | Host port mapped to nginx (`80` → `http://localhost`) |
+| `NGINX_HTTPS_PORT` | Host port mapped to nginx HTTPS (`443`) |
+| `NGINX_CONFIG` | `nginx.http.conf` (local) or `nginx.conf` (TLS) |
+| `DOMAIN`, `CERTBOT_EMAIL`, `CERTBOT_STAGING` | Let's Encrypt (`scripts/init-letsencrypt.sh`) |
 | `NEXT_PUBLIC_API_URL` | Frontend image build arg |
 | `FRONTEND_URL` | Backend CORS origin in Compose |
 

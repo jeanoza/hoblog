@@ -43,3 +43,7 @@ coverage/
 
 # Google Cloud Storage
 gcp-key.json
+
+# Let's Encrypt (generated on server)
+certbot/conf/
+certbot/www/
