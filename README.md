@@ -89,14 +89,16 @@ FRONTEND_URL=https://hoblog.space
 NEXT_PUBLIC_API_URL=/api
 ```
 
-First certificate (creates a short-lived dummy cert, then requests a real one and reloads nginx):
+First certificate (HTTP bootstrap nginx → certbot webroot → TLS nginx; no dummy cert):
 
 ```bash
 chmod +x scripts/init-letsencrypt.sh scripts/renew-letsencrypt.sh
 ./scripts/init-letsencrypt.sh
 ```
 
-Test with staging first (avoids rate limits): set `CERTBOT_STAGING=1` in `.env`, run the script, then set `CERTBOT_STAGING=0` and run again for a production cert.
+`nginx.bootstrap.conf` is used only during init. After success, production uses `NGINX_CONFIG=nginx.conf` with certs under `certbot/conf/live/<DOMAIN>/`.
+
+Test with staging first (avoids rate limits): set `CERTBOT_STAGING=1` in `.env`, run the script, then set `CERTBOT_STAGING=0` and run again for a production cert. Optional `CERTBOT_FORCE_RENEW=1` forces re-issue (rate limits apply).
 
 Renewal (add to host cron, e.g. daily at 03:00):
 
@@ -148,7 +150,7 @@ These appear in more than one file with **different values on purpose**:
 | `NGINX_HOST_PORT` | Host port mapped to nginx (`80` → `http://localhost`) |
 | `NGINX_HTTPS_PORT` | Host port mapped to nginx HTTPS (`443`) |
 | `NGINX_CONFIG` | `nginx.http.conf` (local) or `nginx.conf` (TLS) |
-| `DOMAIN`, `CERTBOT_EMAIL`, `CERTBOT_STAGING` | Let's Encrypt (`scripts/init-letsencrypt.sh`) |
+| `DOMAIN`, `CERTBOT_EMAIL`, `CERTBOT_STAGING`, `CERTBOT_FORCE_RENEW` | Let's Encrypt (`scripts/init-letsencrypt.sh`) |
 | `NEXT_PUBLIC_API_URL` | Frontend image build arg |
 | `FRONTEND_URL` | Backend CORS origin in Compose |
 

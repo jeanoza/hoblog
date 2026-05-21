@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # First-time Let's Encrypt certificate for Docker Compose (webroot).
-# Requires: DOMAIN and CERTBOT_EMAIL in repo root .env; DNS A records for hoblog.space (+ www).
+# Flow: HTTP bootstrap nginx → certbot → TLS nginx (no dummy cert).
+# Requires: DOMAIN and CERTBOT_EMAIL in repo root .env; DNS A records for DOMAIN (+ www).
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
@@ -18,10 +19,10 @@ set +a
 primary="${DOMAIN:-hoblog.space}"
 email="${CERTBOT_EMAIL:?Set CERTBOT_EMAIL in .env}"
 staging="${CERTBOT_STAGING:-0}"
+force_renew="${CERTBOT_FORCE_RENEW:-0}"
 rsa_key_size=4096
-data_path="./certbot"
-www_path="${data_path}/www"
-conf_path="${data_path}/conf"
+www_path="./certbot/www"
+cert_path="./certbot/conf/live/${primary}/fullchain.pem"
 
 if [[ "$staging" != "0" ]]; then
   staging_arg="--staging"
@@ -35,32 +36,10 @@ if ! docker compose version &>/dev/null; then
   exit 1
 fi
 
-mkdir -p "${conf_path}/live/${primary}" "${www_path}"
+mkdir -p "${www_path}"
 
-create_dummy_cert() {
-  local key="${conf_path}/live/${primary}/privkey.pem"
-  local cert="${conf_path}/live/${primary}/fullchain.pem"
-  if command -v openssl &>/dev/null; then
-    openssl req -x509 -nodes -newkey "rsa:${rsa_key_size}" -days 1 \
-      -keyout "$key" -out "$cert" -subj '/CN=localhost'
-    return
-  fi
-  # certbot image ENTRYPOINT is "certbot" — must override to run openssl
-  docker compose --profile certbot run --rm --no-deps \
-    --entrypoint sh certbot -c \
-    "openssl req -x509 -nodes -newkey rsa:${rsa_key_size} -days 1 \
-      -keyout /etc/letsencrypt/live/${primary}/privkey.pem \
-      -out /etc/letsencrypt/live/${primary}/fullchain.pem \
-      -subj '/CN=localhost'"
-}
-
-if [[ ! -f "${conf_path}/live/${primary}/fullchain.pem" ]]; then
-  echo "Creating temporary self-signed cert so nginx can start..."
-  create_dummy_cert
-fi
-
-export NGINX_CONFIG=nginx.conf
-echo "Starting stack with TLS nginx config..."
+echo "Starting stack with HTTP bootstrap nginx (ACME only, no dummy cert)..."
+export NGINX_CONFIG=nginx.bootstrap.conf
 docker compose up -d --build
 
 echo "Requesting Let's Encrypt certificate..."
@@ -68,15 +47,33 @@ certbot_args=(
   certonly --webroot -w /var/www/certbot
   --email "${email}"
   --rsa-key-size "${rsa_key_size}"
-  --agree-tos --no-eff-email --force-renewal
+  --agree-tos --no-eff-email
   -d "${primary}" -d "www.${primary}"
 )
 if [[ -n "${staging_arg}" ]]; then
   certbot_args=(--staging "${certbot_args[@]}")
 fi
+if [[ "${force_renew}" != "0" ]]; then
+  certbot_args+=(--force-renewal)
+fi
 docker compose --profile certbot run --rm --no-deps certbot "${certbot_args[@]}"
 
-echo "Reloading nginx with real certificate..."
+if [[ ! -f "${cert_path}" ]]; then
+  # certbot may use a suffixed lineage (e.g. domain-0001) if live/domain was occupied before
+  alt=$(find ./certbot/conf/live -maxdepth 1 -type d -name "${primary}-*" 2>/dev/null | head -1)
+  if [[ -n "${alt}" && -f "${alt}/fullchain.pem" ]]; then
+    echo "Certificate found at ${alt}/ — update ssl_certificate paths in nginx/nginx.conf to match."
+    exit 1
+  fi
+  echo "Certificate not found at ${cert_path}"
+  exit 1
+fi
+
+echo "Switching to TLS nginx config..."
+export NGINX_CONFIG=nginx.conf
+docker compose up -d --force-recreate nginx
+
+echo "Reloading nginx..."
 docker compose exec nginx nginx -s reload
 
 echo "Done. App should be available at https://${primary}"
