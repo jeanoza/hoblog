@@ -108,6 +108,17 @@ Renewal (add to host cron, e.g. daily at 03:00):
 
 Local Compose keeps HTTP-only via default `NGINX_CONFIG=nginx.http.conf` (no certs required).
 
+### Migrating from another domain (e.g. jeanoza.com → hoblog.space)
+
+1. DNS: **A** records for `hoblog.space` and `www.hoblog.space` → same VM IP (remove or repoint old domain when ready).
+2. VM root `.env`: `DOMAIN=hoblog.space`, `FRONTEND_URL=https://hoblog.space`, `NGINX_CONFIG=nginx.conf`, `CERTBOT_EMAIL=...`.
+3. Optional: remove old certs to avoid confusion — `sudo rm -rf certbot/conf/live/jeanoza.com* certbot/conf/archive/jeanoza.com* certbot/conf/renewal/jeanoza.com*`.
+4. `git pull` then `./scripts/init-letsencrypt.sh` (issues certs under `certbot/conf/live/hoblog.space/`; no dummy cert).
+5. Rebuild frontend if API URL changed: `docker compose build frontend && docker compose up -d`.
+6. GCS: apply updated `backend/gcs-cors.json` (`gsutil cors set backend/gcs-cors.json gs://YOUR_BUCKET`).
+
+Old domain certs are not reused; nginx `server_name` and `ssl_certificate` paths must match `hoblog.space` in `nginx/nginx.conf`.
+
 ## Environment files
 
 Three env files are intentional: each runtime loads from its own directory. Do not merge into a single file unless you also wire Next/Nest to read from the repo root.

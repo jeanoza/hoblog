@@ -1,6 +1,11 @@
 [
   {
-    "origin": ["http://localhost:20001", "http://localhost", "https://YOUR_PRODUCTION_DOMAIN"],
+    "origin": [
+      "http://localhost:20001",
+      "http://localhost",
+      "https://hoblog.space",
+      "https://www.hoblog.space"
+    ],
     "method": ["PUT", "GET"],
     "responseHeader": ["Content-Type"],
     "maxAgeSeconds": 3600

@@ -21,8 +21,13 @@ email="${CERTBOT_EMAIL:?Set CERTBOT_EMAIL in .env}"
 staging="${CERTBOT_STAGING:-0}"
 force_renew="${CERTBOT_FORCE_RENEW:-0}"
 rsa_key_size=4096
-www_path="./certbot/www"
-cert_path="./certbot/conf/live/${primary}/fullchain.pem"
+conf_dir="$(pwd)/certbot/conf"
+www_dir="$(pwd)/certbot/www"
+cert_path="${conf_dir}/live/${primary}/fullchain.pem"
+
+cert_exists() {
+  [[ -e "$1" ]]
+}
 
 if [[ "$staging" != "0" ]]; then
   staging_arg="--staging"
@@ -36,7 +41,7 @@ if ! docker compose version &>/dev/null; then
   exit 1
 fi
 
-mkdir -p "${www_path}"
+mkdir -p "${conf_dir}" "${www_dir}"
 
 echo "Starting stack with HTTP bootstrap nginx (ACME only, no dummy cert)..."
 export NGINX_CONFIG=nginx.bootstrap.conf
@@ -56,16 +61,21 @@ fi
 if [[ "${force_renew}" != "0" ]]; then
   certbot_args+=(--force-renewal)
 fi
-docker compose --profile certbot run --rm --no-deps certbot "${certbot_args[@]}"
+docker compose --profile certbot run --rm --no-deps \
+  -v "${conf_dir}:/etc/letsencrypt" \
+  -v "${www_dir}:/var/www/certbot" \
+  certbot "${certbot_args[@]}"
 
-if [[ ! -f "${cert_path}" ]]; then
+if ! cert_exists "${cert_path}"; then
   # certbot may use a suffixed lineage (e.g. domain-0001) if live/domain was occupied before
-  alt=$(find ./certbot/conf/live -maxdepth 1 -type d -name "${primary}-*" 2>/dev/null | head -1)
-  if [[ -n "${alt}" && -f "${alt}/fullchain.pem" ]]; then
+  alt=$(find "${conf_dir}/live" -maxdepth 1 -type d -name "${primary}-*" 2>/dev/null | head -1)
+  if [[ -n "${alt}" ]] && cert_exists "${alt}/fullchain.pem"; then
     echo "Certificate found at ${alt}/ — update ssl_certificate paths in nginx/nginx.conf to match."
     exit 1
   fi
   echo "Certificate not found at ${cert_path}"
+  echo "Contents of ${conf_dir}/live/:"
+  ls -la "${conf_dir}/live/" 2>/dev/null || true
   exit 1
 fi
 
