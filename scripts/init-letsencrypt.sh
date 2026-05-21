@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # First-time Let's Encrypt certificate for Docker Compose (webroot).
-# Requires: DOMAIN and CERTBOT_EMAIL in repo root .env; DNS A records for jeanoza.com (+ www).
+# Requires: DOMAIN and CERTBOT_EMAIL in repo root .env; DNS A records for hoblog.space (+ www).
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
@@ -15,7 +15,7 @@ set -a
 source .env
 set +a
 
-primary="${DOMAIN:-jeanoza.com}"
+primary="${DOMAIN:-hoblog.space}"
 email="${CERTBOT_EMAIL:?Set CERTBOT_EMAIL in .env}"
 staging="${CERTBOT_STAGING:-0}"
 rsa_key_size=4096

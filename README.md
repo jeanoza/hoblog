@@ -71,21 +71,21 @@ Health check: http://localhost/api/health
 
 For cloud deploy, set `FRONTEND_URL` in the **repo root** `.env` to your public origin (e.g. `http://203.0.113.10` or `https://yourdomain.com`). `NEXT_PUBLIC_API_URL=/api` stays relative.
 
-### HTTPS (Let's Encrypt, jeanoza.com)
+### HTTPS (Let's Encrypt, hoblog.space)
 
 Prerequisites on the server:
 
-- DNS **A** records for `jeanoza.com` and `www.jeanoza.com` pointing to the host
+- DNS **A** records for `hoblog.space` and `www.hoblog.space` pointing to the host
 - Ports **80** and **443** open in the firewall / security group
 - Root `.env` production values, for example:
 
 ```bash
-DOMAIN=jeanoza.com
+DOMAIN=hoblog.space
 CERTBOT_EMAIL=you@example.com
 NGINX_CONFIG=nginx.conf
 NGINX_HOST_PORT=80
 NGINX_HTTPS_PORT=443
-FRONTEND_URL=https://jeanoza.com
+FRONTEND_URL=https://hoblog.space
 NEXT_PUBLIC_API_URL=/api
 ```
 
